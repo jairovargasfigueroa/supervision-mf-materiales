@@ -4,7 +4,7 @@ Obligatorio para todo el código de este proyecto. mf-supervision usa exactament
 
 ## Librerías
 
-React 19, MUI 9 (`@mui/material`, `@mui/icons-material`, `@emotion/react`, `@emotion/styled`, `@emotion/cache`), `@tanstack/react-router` 1 (rutas en código), `@tanstack/react-table` 9, `@tanstack/react-form` 1 + `zod` 4, `@apollo/client` 4 + `graphql` 16. Pruebas: Vitest + `@testing-library/react` + `jsdom`. Native Federation con el adaptador esbuild (`build.mjs`).
+React 19, MUI 9 (`@mui/material`, `@mui/icons-material`, `@emotion/react`, `@emotion/styled`, `@emotion/cache`), `@tanstack/react-router` 1 (rutas en código), `@tanstack/react-table` 9, `@tanstack/react-form` 1 + `zod` 4, `@apollo/client` 4 + `graphql` 16 (con `rxjs` 7, que Apollo 4 exige como dependencia par). Pruebas: Vitest + `@testing-library/react` + `jsdom`. Native Federation con el adaptador esbuild (`build.mjs`).
 
 ## Shadow DOM y tema
 
@@ -27,7 +27,7 @@ src/
   nucleo/
     sesion.ts                  # window.plataforma.sesion (obtenerToken, usuario, roles)
     configuracion.ts           # window.plataforma.configuracion.gatewayUrl (en desarrollo, http://localhost:4000/graphql)
-    apollo.ts                  # cliente con authLink que usa obtenerToken()
+    apollo.ts                  # cliente con SetContextLink que usa obtenerToken(); StockMaterial sin normalizar (no tiene id propio)
     errores.ts                 # extensions.codigo → mensaje
     formato.ts
   catalogo/
