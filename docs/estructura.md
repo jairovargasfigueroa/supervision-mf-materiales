@@ -33,7 +33,7 @@ src/
   catalogo/
     CatalogoPagina.tsx (tabla paginada en el gateway, búsqueda con espera de 300 ms, activar/desactivar con confirmación), MaterialFormulario.tsx (Drawer lateral con TanStack Form), material.esquema.ts (Zod), catalogo.graphql.ts (operaciones, tipos y hooks useMateriales, useGuardarMaterial)
   stock/
-    StockPagina.tsx, FijarMinimoDialogo.tsx, stock.graphql.ts, estado-stock.ts
+    StockPagina.tsx (selector de obra con la obra en ?obra=, tabla con chips de estado), FijarMinimoDialogo.tsx (fijar mínimo de una fila o agregar un material activo del catálogo con Autocomplete), stock.graphql.ts (obras, stockObra, definirStockMinimo), estado-stock.ts
   compartido/
     TablaDatos.tsx             # TanStack Table 9 (rowSortingFeature) dibujada con Table de MUI; meta.numerica alinea a la derecha con cifras tabulares
     EstadoChip.tsx, EstadoVacio.tsx, EstadoError.tsx

@@ -7,5 +7,5 @@ Marca cada tarea al terminarla (con sus pruebas y su commit).
 - [x] Instalar `@apollo/client` 4 + `graphql`; cliente con el token del shell
 - [x] Navegación interna `/materiales/catalogo` y `/materiales/stock`
 - [x] Catálogo: tabla con búsqueda y formulario lateral con atributos dinámicos
-- [ ] Stock por obra: selector de obra, tabla con estados coloreados, fijar mínimo y agregar material
+- [x] Stock por obra: selector de obra, tabla con estados coloreados, fijar mínimo y agregar material
 - [ ] Ocultar acciones de escritura para roles distintos de `admin`; pruebas

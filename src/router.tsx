@@ -74,7 +74,14 @@ const inicio = createRoute({
   },
 });
 const catalogo = createRoute({ getParentRoute: () => raiz, path: '/catalogo', component: CatalogoPagina });
-const stock = createRoute({ getParentRoute: () => raiz, path: '/stock', component: StockPagina });
+// /materiales/stock?obra=<id>: la obra elegida queda en la dirección (sobrevive a recargar la página)
+const stock = createRoute({
+  getParentRoute: () => raiz,
+  path: '/stock',
+  component: StockPagina,
+  validateSearch: (busqueda: Record<string, unknown>): { obra?: string } =>
+    typeof busqueda['obra'] === 'string' && busqueda['obra'] ? { obra: busqueda['obra'] } : {},
+});
 
 const arbol = raiz.addChildren([inicio, catalogo, stock]);
 
