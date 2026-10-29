@@ -69,8 +69,8 @@ describe('CatalogoPagina', () => {
   it('lista los materiales con código, nombre, tipo, unidad, precio y estado (criterio 1)', async () => {
     dibujar([listar([CEMENTO, FIERRO])]);
 
-    const tabla = await screen.findByRole('table', { name: 'Catálogo de materiales' });
-    const filas = await within(tabla).findAllByRole('row');
+    await screen.findByText('CEM-IP30');
+    const filas = within(screen.getByRole('table', { name: 'Catálogo de materiales' })).getAllByRole('row');
     expect(filas).toHaveLength(3);
     const cemento = within(filas[1]);
     expect(cemento.getByText('CEM-IP30')).toBeTruthy();

@@ -39,6 +39,11 @@ function primerError(errores: readonly unknown[]): string | undefined {
   return (error as { message?: string }).message;
 }
 
+/** El error de un campo se muestra recién cuando la persona lo tocó o intentó guardar (que marca todos). */
+function errorVisible(meta: { isTouched: boolean; errors: readonly unknown[] }): string | undefined {
+  return meta.isTouched ? primerError(meta.errors) : undefined;
+}
+
 // Panel lateral para crear o editar un material (003): datos, precio y atributos como filas dinámicas.
 export function MaterialFormulario({ abierto, material, alCerrar, alGuardar }: Props) {
   const { crear, actualizar } = useGuardarMaterial();
@@ -100,7 +105,7 @@ export function MaterialFormulario({ abierto, material, alCerrar, alGuardar }: P
             name="codigo"
             listeners={{ onChange: () => setErrorCodigo(undefined) }}
             children={(campo) => {
-              const error = errorCodigo ?? primerError(campo.state.meta.errors);
+              const error = errorCodigo ?? errorVisible(campo.state.meta);
               return (
                 <TextField
                   label="Código"
@@ -119,7 +124,7 @@ export function MaterialFormulario({ abierto, material, alCerrar, alGuardar }: P
           <formulario.Field
             name="nombre"
             children={(campo) => {
-              const error = primerError(campo.state.meta.errors);
+              const error = errorVisible(campo.state.meta);
               return (
                 <TextField
                   label="Nombre"
@@ -159,7 +164,7 @@ export function MaterialFormulario({ abierto, material, alCerrar, alGuardar }: P
             <formulario.Field
               name="unidad"
               children={(campo) => {
-                const error = primerError(campo.state.meta.errors);
+                const error = errorVisible(campo.state.meta);
                 return (
                   <TextField
                     label="Unidad"
@@ -178,7 +183,7 @@ export function MaterialFormulario({ abierto, material, alCerrar, alGuardar }: P
             <formulario.Field
               name="unidadPlural"
               children={(campo) => {
-                const error = primerError(campo.state.meta.errors);
+                const error = errorVisible(campo.state.meta);
                 return (
                   <TextField
                     label="Unidad en plural"
@@ -199,7 +204,7 @@ export function MaterialFormulario({ abierto, material, alCerrar, alGuardar }: P
           <formulario.Field
             name="precioReferencial"
             children={(campo) => {
-              const error = primerError(campo.state.meta.errors);
+              const error = errorVisible(campo.state.meta);
               return (
                 <TextField
                   label="Precio referencial"
@@ -233,7 +238,7 @@ export function MaterialFormulario({ abierto, material, alCerrar, alGuardar }: P
                       <formulario.Field
                         name={`atributos[${i}].nombre`}
                         children={(campo) => {
-                          const error = primerError(campo.state.meta.errors);
+                          const error = errorVisible(campo.state.meta);
                           return (
                             <TextField
                               size="small"
@@ -252,7 +257,7 @@ export function MaterialFormulario({ abierto, material, alCerrar, alGuardar }: P
                       <formulario.Field
                         name={`atributos[${i}].valor`}
                         children={(campo) => {
-                          const error = primerError(campo.state.meta.errors);
+                          const error = errorVisible(campo.state.meta);
                           return (
                             <TextField
                               size="small"

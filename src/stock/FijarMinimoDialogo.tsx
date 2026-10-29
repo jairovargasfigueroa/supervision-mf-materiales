@@ -45,6 +45,11 @@ function primerError(errores: readonly unknown[]): string | undefined {
   return typeof error === 'string' ? error : (error as { message?: string }).message;
 }
 
+/** El error de un campo se muestra recién cuando la persona lo tocó o intentó guardar (que marca todos). */
+function errorVisible(meta: { isTouched: boolean; errors: readonly unknown[] }): string | undefined {
+  return meta.isTouched ? primerError(meta.errors) : undefined;
+}
+
 /** Busca materiales activos del catálogo mientras se escribe. */
 function SelectorMaterial({
   valor,
@@ -145,7 +150,7 @@ export function FijarMinimoDialogo({ abierto, obraId, fila, yaEnObra, alCerrar, 
                   <SelectorMaterial
                     valor={elegido}
                     yaEnObra={yaEnObra}
-                    error={primerError(campo.state.meta.errors)}
+                    error={errorVisible(campo.state.meta)}
                     alElegir={(material) => {
                       setElegido(material);
                       campo.handleChange(material?.id ?? '');
@@ -157,7 +162,7 @@ export function FijarMinimoDialogo({ abierto, obraId, fila, yaEnObra, alCerrar, 
             <formulario.Field
               name="minimo"
               children={(campo) => {
-                const error = primerError(campo.state.meta.errors);
+                const error = errorVisible(campo.state.meta);
                 return (
                   <TextField
                     label="Stock mínimo"
