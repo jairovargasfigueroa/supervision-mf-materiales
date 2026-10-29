@@ -26,6 +26,7 @@ src/
   router.tsx                   # árbol de rutas (catalogo, stock, ordenes en capa 2)
   nucleo/
     sesion.ts                  # window.plataforma.sesion (obtenerToken, usuario, roles)
+    configuracion.ts           # window.plataforma.configuracion.gatewayUrl (en desarrollo, http://localhost:4000/graphql)
     apollo.ts                  # cliente con authLink que usa obtenerToken()
     errores.ts                 # extensions.codigo → mensaje
     formato.ts
@@ -36,7 +37,7 @@ src/
   compartido/
     TablaDatos.tsx             # TanStack Table dibujada con Table de MUI (orden, búsqueda)
     EstadoChip.tsx, EstadoVacio.tsx, EstadoError.tsx
-build.mjs, federation.config.js, public/index.html
+build.mjs, federation.config.js, vitest.config.ts, public/index.html
 ```
 
 ## Reglas
@@ -48,4 +49,4 @@ build.mjs, federation.config.js, public/index.html
 
 ## Pruebas
 
-Vitest + Testing Library para componentes y funciones puras (`npm test`, agregar el script al crear la primera prueba).
+Vitest + Testing Library (entorno `jsdom`, `vitest.config.ts`) para componentes y funciones puras: `npm test`. Cada prueba va junto a su archivo (`formato.test.ts`, `estados.test.tsx`).
