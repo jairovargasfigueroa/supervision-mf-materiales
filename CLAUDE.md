@@ -32,17 +32,9 @@ npm test             # Vitest
 - `build.mjs` compila con `runEsBuildBuilder` y, con `--dev`, sirve `dist/` y `public/` con CORS abierto para el shell.
 - Los estilos van dentro del Shadow DOM; no se cargan hojas globales.
 
-## Estructura prevista
+## Estructura
 
-```
-src/
-  bootstrap.tsx   Web Component (no tocar salvo para pasar propiedades del shell)
-  App.tsx
-  catalogo/       lista y edición de materiales
-  stock/          stock por obra y estado (bajo, justo, ok)
-  consumos/       usado frente a previsto por partida
-  shared/
-```
+Ver `docs/estructura.md` (obligatorio): `bootstrap.tsx` (Web Component con Shadow DOM, caché de Emotion y tema), `nucleo/` (sesión, configuración, formato), `compartido/` y una carpeta por área (`catalogo/`, `stock/`).
 
 ## Reglas del proyecto
 
