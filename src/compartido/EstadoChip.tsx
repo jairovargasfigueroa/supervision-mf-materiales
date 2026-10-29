@@ -17,12 +17,5 @@ interface Props {
 // Estado del dominio como chip: fondo suave y texto del color fuerte (docs/diseno-visual.md)
 export function EstadoChip({ etiqueta, tono }: Props) {
   const { fondo, texto } = PALETA[tono];
-  return (
-    <Chip
-      label={etiqueta}
-      size="small"
-      data-tono={tono}
-      sx={{ bgcolor: fondo, color: texto, fontWeight: 600 }}
-    />
-  );
+  return <Chip label={etiqueta} size="small" data-tono={tono} sx={{ bgcolor: fondo, color: texto, fontWeight: 600 }} />;
 }

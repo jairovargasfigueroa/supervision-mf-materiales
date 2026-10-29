@@ -63,7 +63,12 @@ function SelectorMaterial({
     const espera = setTimeout(() => setBusqueda(texto.trim()), 300);
     return () => clearTimeout(espera);
   }, [texto]);
-  const { pagina, loading } = useMateriales({ busqueda: busqueda || undefined, soloActivos: true, pagina: 1, tamano: 20 });
+  const { pagina, loading } = useMateriales({
+    busqueda: busqueda || undefined,
+    soloActivos: true,
+    pagina: 1,
+    tamano: 20,
+  });
   const opciones = (pagina?.items ?? []).filter((m) => !yaEnObra.includes(m.id));
 
   return (
@@ -79,7 +84,13 @@ function SelectorMaterial({
       noOptionsText="No hay materiales activos que coincidan"
       loadingText="Buscando…"
       renderInput={(params) => (
-        <TextField {...params} label="Material" required error={!!error} helperText={error ?? 'Solo materiales activos'} />
+        <TextField
+          {...params}
+          label="Material"
+          required
+          error={!!error}
+          helperText={error ?? 'Solo materiales activos'}
+        />
       )}
     />
   );

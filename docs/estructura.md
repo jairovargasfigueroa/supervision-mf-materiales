@@ -29,6 +29,7 @@ src/
     configuracion.ts           # window.plataforma.configuracion.gatewayUrl (en desarrollo, http://localhost:4000/graphql)
     apollo.ts                  # cliente con SetContextLink que usa obtenerToken(); StockMaterial sin normalizar (no tiene id propio)
     errores.ts                 # extensions.codigo → mensaje
+    permisos.ts                # roles efectivos del ERP (solo los internos) y puedeGestionarMateriales (solo admin)
     formato.ts
   catalogo/
     CatalogoPagina.tsx (tabla paginada en el gateway, búsqueda con espera de 300 ms, activar/desactivar con confirmación), MaterialFormulario.tsx (Drawer lateral con TanStack Form), material.esquema.ts (Zod), catalogo.graphql.ts (operaciones, tipos y hooks useMateriales, useGuardarMaterial)
@@ -45,8 +46,8 @@ build.mjs, federation.config.js, vitest.config.ts, vitest.setup.ts (scrollTo de 
 - Componentes de función con TypeScript estricto; un componente por archivo (`PascalCase.tsx`); lógica pura en `kebab-case.ts`.
 - Formularios: `useForm` de TanStack Form con `validators: { onChange: esquemaZod }`; los mensajes de error en español vienen del esquema.
 - Datos: `useQuery`/`useMutation` de Apollo en hooks por área (`useMateriales`, `useStockObra`).
-- Acciones visibles según `usuario.roles` (función pura probada).
+- Acciones visibles según `usuario.roles` (función pura probada, `nucleo/permisos.ts`): los roles llegan tal cual del token, así que se filtran a los internos antes de mirar `admin`.
 
 ## Pruebas
 
-Vitest + Testing Library (entorno `jsdom`, `vitest.config.ts`) para componentes y funciones puras: `npm test`. Cada prueba va junto a su archivo (`formato.test.ts`, `estados.test.tsx`).
+Vitest + Testing Library (entorno `jsdom`, `vitest.config.ts`) para componentes y funciones puras: `npm test`. Cada prueba va junto a su archivo (`formato.test.ts`, `estados.test.tsx`). Las pantallas se prueban con `MockedProvider` de `@apollo/client/testing/react` y, si usan rutas, con `crearRouter(createMemoryHistory(...))`.

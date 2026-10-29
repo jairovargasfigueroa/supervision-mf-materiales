@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing/react';
 import type { MockLink } from '@apollo/client/testing';
@@ -7,7 +7,23 @@ import { MATERIALES, type Material } from '../catalogo/catalogo.graphql';
 import { crearRouter } from '../router';
 import { DEFINIR_STOCK_MINIMO, OBRAS, STOCK_OBRA, type StockMaterial } from './stock.graphql';
 
-afterEach(cleanup);
+/** Sesión del shell con los roles del token (incluye los técnicos de Keycloak). */
+function sesionCon(...roles: string[]) {
+  window.plataforma = {
+    sesion: {
+      usuario: { id: 'u1', nombre: 'Ana', roles: ['default-roles-supervision', 'offline_access', ...roles] },
+      obtenerToken: vi.fn().mockResolvedValue('t'),
+      cerrarSesion: vi.fn(),
+    },
+    configuracion: { gatewayUrl: 'http://localhost:4000/graphql' },
+  };
+}
+
+beforeEach(() => sesionCon('admin'));
+afterEach(() => {
+  cleanup();
+  delete window.plataforma;
+});
 
 const OBRA = 'b0000000-0000-4000-8000-000000000101';
 
@@ -23,8 +39,26 @@ const fila = (f: Partial<StockMaterial> & Pick<StockMaterial, 'materialId' | 'co
 
 const STOCK = [
   fila({ materialId: 'm1', codigo: 'CEM-IP30', nombre: 'Cemento IP-30', cantidad: 80, minimo: 100, estado: 'BAJO' }),
-  fila({ materialId: 'm2', codigo: 'ARE-01', nombre: 'Arena fina', unidad: 'm³', unidadPlural: 'm³', cantidad: 125, minimo: 100, estado: 'JUSTO' }),
-  fila({ materialId: 'm3', codigo: 'LAD-6H', nombre: 'Ladrillo 6 huecos', unidad: 'pieza', unidadPlural: 'piezas', cantidad: 1, minimo: 0, estado: 'OK' }),
+  fila({
+    materialId: 'm2',
+    codigo: 'ARE-01',
+    nombre: 'Arena fina',
+    unidad: 'm³',
+    unidadPlural: 'm³',
+    cantidad: 125,
+    minimo: 100,
+    estado: 'JUSTO',
+  }),
+  fila({
+    materialId: 'm3',
+    codigo: 'LAD-6H',
+    nombre: 'Ladrillo 6 huecos',
+    unidad: 'pieza',
+    unidadPlural: 'piezas',
+    cantidad: 1,
+    minimo: 0,
+    estado: 'OK',
+  }),
 ];
 
 const obras: MockLink.MockedResponse = {
@@ -92,19 +126,41 @@ describe('StockPagina', () => {
     expect(within(ladrillo).getByText('OK').closest('[data-tono]')?.getAttribute('data-tono')).toBe('exito');
   });
 
+  it('residente ve el stock de su obra sin Fijar mínimo ni Agregar material (criterio 7)', async () => {
+    sesionCon('residente');
+    dibujar([obras, stock(STOCK)]);
+    await filasTabla();
+
+    expect(screen.queryByRole('button', { name: 'Fijar mínimo' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Agregar material' })).toBeNull();
+    expect(screen.getByText('Bajo')).toBeTruthy();
+  });
+
+  it('admin ve Fijar mínimo en cada fila y Agregar material', async () => {
+    dibujar([obras, stock(STOCK)]);
+    await filasTabla();
+    expect(screen.getAllByRole('button', { name: 'Fijar mínimo' })).toHaveLength(3);
+    expect(screen.getByRole('button', { name: 'Agregar material' })).toBeTruthy();
+  });
+
   it('una obra sin materiales muestra el estado vacío', async () => {
     dibujar([obras, stock([])]);
-    expect(await screen.findByText('Esta obra todavía no tiene materiales con movimientos ni mínimo definido.')).toBeTruthy();
+    expect(
+      await screen.findByText('Esta obra todavía no tiene materiales con movimientos ni mínimo definido.'),
+    ).toBeTruthy();
   });
 
   it('una obra que el usuario no ve muestra «Obra no encontrada» (criterio 8)', async () => {
-    dibujar([
-      obras,
-      {
-        request: { query: STOCK_OBRA, variables: { obraId: 'ajena' } },
-        result: { errors: [{ message: 'x', extensions: { codigo: 'OBRA_NO_ENCONTRADA', servicio: 'materiales' } }] },
-      },
-    ], '/materiales/stock?obra=ajena');
+    dibujar(
+      [
+        obras,
+        {
+          request: { query: STOCK_OBRA, variables: { obraId: 'ajena' } },
+          result: { errors: [{ message: 'x', extensions: { codigo: 'OBRA_NO_ENCONTRADA', servicio: 'materiales' } }] },
+        },
+      ],
+      '/materiales/stock?obra=ajena',
+    );
     expect(await screen.findByText('Obra no encontrada')).toBeTruthy();
   });
 

@@ -16,6 +16,7 @@ import { EstadoVacio } from '../compartido/EstadoVacio';
 import { ayudanteColumnas, TablaDatos } from '../compartido/TablaDatos';
 import { codigoDeError, mensajeDeError } from '../nucleo/errores';
 import { formatearCantidad } from '../nucleo/formato';
+import { usePuedeGestionarMateriales } from '../nucleo/permisos';
 import { AYUDA_ESTADOS, presentacionEstado, unidadSegunCantidad } from './estado-stock';
 import { FijarMinimoDialogo } from './FijarMinimoDialogo';
 import { useObras, useStockObra, type StockMaterial } from './stock.graphql';
@@ -32,6 +33,7 @@ const ORDEN_ESTADO = { BAJO: 0, JUSTO: 1, OK: 2 } as const;
 export function StockPagina() {
   const { obra: obraId } = ruta.useSearch();
   const navegar = ruta.useNavigate();
+  const puedeGestionar = usePuedeGestionarMateriales();
   const obras = useObras();
   const stock = useStockObra(obraId);
   const [dialogo, setDialogo] = useState<Dialogo>({ abierto: false });
@@ -61,17 +63,22 @@ export function StockPagina() {
         sortFn: 'basic',
         cell: ({ row: { original: f } }) => <EstadoChip {...presentacionEstado(f.estado)} />,
       }),
-      columna.display({
-        id: 'acciones',
-        header: 'Acciones',
-        cell: ({ row }) => (
-          <Button size="small" onClick={() => setDialogo({ abierto: true, fila: row.original })}>
-            Fijar mínimo
-          </Button>
-        ),
-      }),
+      // Solo admin fija mínimos (criterio 7)
+      ...(!puedeGestionar
+        ? []
+        : [
+            columna.display({
+              id: 'acciones',
+              header: 'Acciones',
+              cell: ({ row }) => (
+                <Button size="small" onClick={() => setDialogo({ abierto: true, fila: row.original })}>
+                  Fijar mínimo
+                </Button>
+              ),
+            }),
+          ]),
     ],
-    [],
+    [puedeGestionar],
   );
 
   const filas = stock.data?.stockObra ?? SIN_FILAS;
@@ -90,7 +97,9 @@ export function StockPagina() {
         filas={filas}
         idFila={(f) => f.materialId}
         vacio={
-          stock.data && <EstadoVacio texto="Esta obra todavía no tiene materiales con movimientos ni mínimo definido." />
+          stock.data && (
+            <EstadoVacio texto="Esta obra todavía no tiene materiales con movimientos ni mínimo definido." />
+          )
         }
       />
     );
@@ -111,7 +120,9 @@ export function StockPagina() {
           onChange={(e) => void navegar({ search: { obra: e.target.value || undefined } })}
           sx={{ width: { xs: '100%', sm: 360 } }}
           disabled={!listaObras?.length}
-          helperText={obras.error ? mensajeDeError(obras.error) : listaObras?.length === 0 ? 'Aún no hay obras.' : undefined}
+          helperText={
+            obras.error ? mensajeDeError(obras.error) : listaObras?.length === 0 ? 'Aún no hay obras.' : undefined
+          }
           error={!!obras.error}
         >
           {(listaObras ?? []).map((obra) => (
@@ -120,7 +131,7 @@ export function StockPagina() {
             </MenuItem>
           ))}
         </TextField>
-        {obraId && stock.data && (
+        {puedeGestionar && obraId && stock.data && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDialogo({ abierto: true })}>
             Agregar material
           </Button>
@@ -136,7 +147,7 @@ export function StockPagina() {
         {AYUDA_ESTADOS}
       </Typography>
 
-      {obraId && (
+      {puedeGestionar && obraId && (
         <FijarMinimoDialogo
           key={dialogo.abierto ? (dialogo.fila?.materialId ?? 'agregar') : 'cerrado'}
           abierto={dialogo.abierto}

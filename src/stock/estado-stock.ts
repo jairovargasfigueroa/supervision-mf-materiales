@@ -21,4 +21,5 @@ export function unidadSegunCantidad(cantidad: number, unidad: string, unidadPlur
 }
 
 /** Texto de ayuda con la regla de los estados (reglas-negocio.md, «Materiales»). */
-export const AYUDA_ESTADOS = 'Bajo: menos que el mínimo · Justo: entre el mínimo y 125 % del mínimo · OK: más de 125 % del mínimo.';
+export const AYUDA_ESTADOS =
+  'Bajo: menos que el mínimo · Justo: entre el mínimo y 125 % del mínimo · OK: más de 125 % del mínimo.';

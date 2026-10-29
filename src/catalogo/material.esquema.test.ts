@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { entradaDesdeMaterial, type Material } from './catalogo.graphql';
-import { entradaDesdeValores, esquemaMaterial, leerPrecio, valoresDesdeMaterial, VALORES_NUEVO } from './material.esquema';
+import {
+  entradaDesdeValores,
+  esquemaMaterial,
+  leerPrecio,
+  valoresDesdeMaterial,
+  VALORES_NUEVO,
+} from './material.esquema';
 
 const MATERIAL: Material = {
   id: 'm1',

@@ -1,11 +1,27 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing/react';
 import type { MockLink } from '@apollo/client/testing';
 import { ACTUALIZAR_MATERIAL, CREAR_MATERIAL, MATERIALES, type Material } from './catalogo.graphql';
 import { CatalogoPagina } from './CatalogoPagina';
 
-afterEach(cleanup);
+/** Sesión del shell con los roles del token (incluye los técnicos de Keycloak). */
+function sesionCon(...roles: string[]) {
+  window.plataforma = {
+    sesion: {
+      usuario: { id: 'u1', nombre: 'Ana', roles: ['default-roles-supervision', 'offline_access', ...roles] },
+      obtenerToken: vi.fn().mockResolvedValue('t'),
+      cerrarSesion: vi.fn(),
+    },
+    configuracion: { gatewayUrl: 'http://localhost:4000/graphql' },
+  };
+}
+
+beforeEach(() => sesionCon('admin'));
+afterEach(() => {
+  cleanup();
+  delete window.plataforma;
+});
 
 const CEMENTO: Material = {
   id: 'm1',
@@ -87,6 +103,30 @@ describe('CatalogoPagina', () => {
   it('si el gateway falla muestra el error con Reintentar', async () => {
     dibujar([{ ...listar([]), result: undefined, error: new Error('red') }]);
     expect(await screen.findByRole('button', { name: 'Reintentar' })).toBeTruthy();
+  });
+
+  it.each([['residente'], ['gerente']])(
+    '%s solo consulta: no ve Nuevo material, Editar ni Desactivar (criterio 2)',
+    async (rol) => {
+      sesionCon(rol);
+      dibujar([listar([CEMENTO, FIERRO])]);
+      await screen.findByText('CEM-IP30');
+
+      expect(screen.queryByRole('button', { name: 'Nuevo material' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Editar' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Desactivar' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Activar' })).toBeNull();
+      expect(screen.queryByRole('columnheader', { name: 'Acciones' })).toBeNull();
+    },
+  );
+
+  it('admin ve las acciones de escritura', async () => {
+    dibujar([listar([CEMENTO, FIERRO])]);
+    await screen.findByText('CEM-IP30');
+    expect(screen.getByRole('button', { name: 'Nuevo material' })).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: 'Editar' })).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Desactivar' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Activar' })).toBeTruthy();
   });
 
   it('el formulario lateral valida los campos obligatorios', async () => {

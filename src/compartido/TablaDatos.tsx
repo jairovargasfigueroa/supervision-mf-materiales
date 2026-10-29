@@ -113,7 +113,11 @@ export function TablaDatos<T extends RowData>({ columnas, filas, etiqueta, idFil
               {fila.getAllCells().map((celda) => {
                 const numerica = celda.column.columnDef.meta?.numerica;
                 return (
-                  <TableCell key={celda.id} align={numerica ? 'right' : 'left'} sx={numerica ? estiloNumero : undefined}>
+                  <TableCell
+                    key={celda.id}
+                    align={numerica ? 'right' : 'left'}
+                    sx={numerica ? estiloNumero : undefined}
+                  >
                     <tabla.FlexRender cell={celda} />
                   </TableCell>
                 );
