@@ -26,6 +26,7 @@ src/
   router.tsx                   # árbol de rutas (catalogo, stock, ordenes en capa 2)
   nucleo/
     sesion.ts                  # window.plataforma.sesion (obtenerToken, usuario, roles)
+    configuracion.ts           # window.plataforma.configuracion.gatewayUrl (en desarrollo, http://localhost:4000/graphql)
     apollo.ts                  # cliente con authLink que usa obtenerToken()
     errores.ts                 # extensions.codigo → mensaje
     formato.ts
