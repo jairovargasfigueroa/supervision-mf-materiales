@@ -14,7 +14,7 @@ React 19, MUI 9 (`@mui/material`, `@mui/icons-material`, `@emotion/react`, `@emo
 
 ## Rutas
 
-TanStack Router con `createBrowserHistory()` y `basepath: '/materiales'` (en mf-supervision, `/supervision`). El shell deja la ruta `/materiales/**` al microfrontend; el router interno maneja el resto. Para ir a otra área se usa `window.history.pushState` + `dispatchEvent(new PopStateEvent('popstate'))`.
+TanStack Router con `createBrowserHistory()` y `basepath: '/materiales'` (en mf-supervision, `/supervision`). El shell deja la ruta `/materiales/**` al microfrontend; el router interno maneja el resto. El historial del navegador de TanStack intercepta `pushState`, así que también se entera cuando navega el shell; `App.tsx` lo destruye al desmontar. Para ir a otra área se usa `window.history.pushState` + `dispatchEvent(new PopStateEvent('popstate'))`.
 
 ## Árbol
 
@@ -23,7 +23,7 @@ src/
   bootstrap.tsx                # Web Component <mf-materiales>, Shadow DOM, CacheProvider, ThemeProvider
   App.tsx                      # ApolloProvider + RouterProvider
   tema.ts
-  router.tsx                   # árbol de rutas (catalogo, stock, ordenes en capa 2)
+  router.tsx                   # árbol de rutas (catalogo, stock, ordenes en capa 2); /materiales lleva a /materiales/catalogo; pestañas del área
   nucleo/
     sesion.ts                  # window.plataforma.sesion (obtenerToken, usuario, roles)
     configuracion.ts           # window.plataforma.configuracion.gatewayUrl (en desarrollo, http://localhost:4000/graphql)
@@ -37,7 +37,7 @@ src/
   compartido/
     TablaDatos.tsx             # TanStack Table dibujada con Table de MUI (orden, búsqueda)
     EstadoChip.tsx, EstadoVacio.tsx, EstadoError.tsx
-build.mjs, federation.config.js, vitest.config.ts, public/index.html
+build.mjs, federation.config.js, vitest.config.ts, vitest.setup.ts (scrollTo de jsdom), public/index.html
 ```
 
 ## Reglas
