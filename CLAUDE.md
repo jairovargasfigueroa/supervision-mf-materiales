@@ -4,13 +4,13 @@ Microfrontend del ERP para materiales: catálogo, stock mínimo, stock por obra 
 
 Parte de la «Plataforma de supervisión de obras». Si existe `../../CLAUDE.md` (carpeta que agrupa todos los proyectos), léelo primero: tiene las reglas transversales, el plan y los contratos generales.
 
-**Estado:** Native Federation configurado, tema MUI dentro del Shadow DOM, `formato.ts`, estados vacío y error, y lectura de la sesión del shell (`nucleo/sesion.ts`, `nucleo/configuracion.ts`; sin shell muestra «Abre esta pantalla desde el ERP») (fase 1); sin pantallas del negocio. No implementes una funcionalidad sin su especificación aprobada en `docs/specs/`.
+**Estado:** Native Federation configurado, tema MUI dentro del Shadow DOM, `formato.ts`, estados vacío y error, y lectura de la sesión del shell (`nucleo/sesion.ts`, `nucleo/configuracion.ts`; sin shell muestra «Abre esta pantalla desde el ERP») (fase 1). 003: Apollo Client con el token del shell, rutas `/materiales/catalogo` y `/materiales/stock`, catálogo (tabla con búsqueda, formulario lateral, activar/desactivar) y stock por obra (estados con color, fijar mínimo, agregar material); las acciones de escritura solo para `admin`. No implementes una funcionalidad sin su especificación aprobada en `docs/specs/`.
 
 ## Stack
 
 - Node 24 · React 19 · TypeScript 6
 - Native Federation 4 con el **adaptador esbuild** (`@softarc/native-federation` 4.7 + `@softarc/native-federation-esbuild` 4.2) y su preset oficial de React
-- Previsto: Apollo Client 4 (GraphQL hacia el gateway)
+- Apollo Client 4 + `graphql` 16 (GraphQL hacia el gateway; `rxjs` 7 es dependencia obligatoria de Apollo 4), cliente en `src/nucleo/apollo.ts` con el token del shell
 - Puerto: `4202` (`PORT`)
 
 ## Comandos

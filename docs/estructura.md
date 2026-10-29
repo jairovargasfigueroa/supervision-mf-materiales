@@ -4,7 +4,7 @@ Obligatorio para todo el código de este proyecto. mf-supervision usa exactament
 
 ## Librerías
 
-React 19, MUI 9 (`@mui/material`, `@mui/icons-material`, `@emotion/react`, `@emotion/styled`, `@emotion/cache`), `@tanstack/react-router` 1 (rutas en código), `@tanstack/react-table` 9, `@tanstack/react-form` 1 + `zod` 4, `@apollo/client` 4 + `graphql` 16. Pruebas: Vitest + `@testing-library/react` + `jsdom`. Native Federation con el adaptador esbuild (`build.mjs`).
+React 19, MUI 9 (`@mui/material`, `@mui/icons-material`, `@emotion/react`, `@emotion/styled`, `@emotion/cache`), `@tanstack/react-router` 1 (rutas en código), `@tanstack/react-table` 9, `@tanstack/react-form` 1 + `zod` 4, `@apollo/client` 4 + `graphql` 16 (con `rxjs` 7, que Apollo 4 exige como dependencia par). Pruebas: Vitest + `@testing-library/react` + `jsdom`. Native Federation con el adaptador esbuild (`build.mjs`).
 
 ## Shadow DOM y tema
 
@@ -14,7 +14,7 @@ React 19, MUI 9 (`@mui/material`, `@mui/icons-material`, `@emotion/react`, `@emo
 
 ## Rutas
 
-TanStack Router con `createBrowserHistory()` y `basepath: '/materiales'` (en mf-supervision, `/supervision`). El shell deja la ruta `/materiales/**` al microfrontend; el router interno maneja el resto. Para ir a otra área se usa `window.history.pushState` + `dispatchEvent(new PopStateEvent('popstate'))`.
+TanStack Router con `createBrowserHistory()` y `basepath: '/materiales'` (en mf-supervision, `/supervision`). El shell deja la ruta `/materiales/**` al microfrontend; el router interno maneja el resto. El historial del navegador de TanStack intercepta `pushState`, así que también se entera cuando navega el shell; `App.tsx` lo destruye al desmontar. Para ir a otra área se usa `window.history.pushState` + `dispatchEvent(new PopStateEvent('popstate'))`.
 
 ## Árbol
 
@@ -23,21 +23,22 @@ src/
   bootstrap.tsx                # Web Component <mf-materiales>, Shadow DOM, CacheProvider, ThemeProvider
   App.tsx                      # ApolloProvider + RouterProvider
   tema.ts
-  router.tsx                   # árbol de rutas (catalogo, stock, ordenes en capa 2)
+  router.tsx                   # árbol de rutas (catalogo, stock, ordenes en capa 2); /materiales lleva a /materiales/catalogo; pestañas del área
   nucleo/
     sesion.ts                  # window.plataforma.sesion (obtenerToken, usuario, roles)
     configuracion.ts           # window.plataforma.configuracion.gatewayUrl (en desarrollo, http://localhost:4000/graphql)
-    apollo.ts                  # cliente con authLink que usa obtenerToken()
+    apollo.ts                  # cliente con SetContextLink que usa obtenerToken(); StockMaterial sin normalizar (no tiene id propio)
     errores.ts                 # extensions.codigo → mensaje
+    permisos.ts                # roles efectivos del ERP (solo los internos) y puedeGestionarMateriales (solo admin)
     formato.ts
   catalogo/
-    CatalogoPagina.tsx, MaterialFormulario.tsx, material.esquema.ts (Zod), catalogo.graphql.ts
+    CatalogoPagina.tsx (tabla paginada en el gateway, búsqueda con espera de 300 ms, activar/desactivar con confirmación), MaterialFormulario.tsx (Drawer lateral con TanStack Form), material.esquema.ts (Zod), catalogo.graphql.ts (operaciones, tipos y hooks useMateriales, useGuardarMaterial)
   stock/
-    StockPagina.tsx, FijarMinimoDialogo.tsx, stock.graphql.ts, estado-stock.ts
+    StockPagina.tsx (selector de obra con la obra en ?obra=, tabla con chips de estado), FijarMinimoDialogo.tsx (fijar mínimo de una fila o agregar un material activo del catálogo con Autocomplete), stock.graphql.ts (obras, stockObra, definirStockMinimo), estado-stock.ts
   compartido/
-    TablaDatos.tsx             # TanStack Table dibujada con Table de MUI (orden, búsqueda)
+    TablaDatos.tsx             # TanStack Table 9 (rowSortingFeature) dibujada con Table de MUI; meta.numerica alinea a la derecha con cifras tabulares
     EstadoChip.tsx, EstadoVacio.tsx, EstadoError.tsx
-build.mjs, federation.config.js, vitest.config.ts, public/index.html
+build.mjs, federation.config.js, vitest.config.ts, vitest.setup.ts (scrollTo de jsdom), public/index.html
 ```
 
 ## Reglas
@@ -45,8 +46,8 @@ build.mjs, federation.config.js, vitest.config.ts, public/index.html
 - Componentes de función con TypeScript estricto; un componente por archivo (`PascalCase.tsx`); lógica pura en `kebab-case.ts`.
 - Formularios: `useForm` de TanStack Form con `validators: { onChange: esquemaZod }`; los mensajes de error en español vienen del esquema.
 - Datos: `useQuery`/`useMutation` de Apollo en hooks por área (`useMateriales`, `useStockObra`).
-- Acciones visibles según `usuario.roles` (función pura probada).
+- Acciones visibles según `usuario.roles` (función pura probada, `nucleo/permisos.ts`): los roles llegan tal cual del token, así que se filtran a los internos antes de mirar `admin`.
 
 ## Pruebas
 
-Vitest + Testing Library (entorno `jsdom`, `vitest.config.ts`) para componentes y funciones puras: `npm test`. Cada prueba va junto a su archivo (`formato.test.ts`, `estados.test.tsx`).
+Vitest + Testing Library (entorno `jsdom`, `vitest.config.ts`) para componentes y funciones puras: `npm test`. Cada prueba va junto a su archivo (`formato.test.ts`, `estados.test.tsx`). Las pantallas se prueban con `MockedProvider` de `@apollo/client/testing/react` y, si usan rutas, con `crearRouter(createMemoryHistory(...))`.
