@@ -13,6 +13,8 @@
 
 La comparación «usado frente a previsto» por partida no está aquí: es la pestaña «Material» del detalle de obra, en mf-obras (006).
 
+Sin conexión (104): el catálogo y el stock por obra muestran la última respuesta guardada en el equipo con «Sin conexión · datos del dd/mm/aaaa hh:mm» (o «No hay datos guardados de esta pantalla»), y las acciones de escritura quedan deshabilitadas con «Requiere conexión».
+
 Referencia visual: el prototipo HTML de la carpeta general.
 
 ## Qué no hace

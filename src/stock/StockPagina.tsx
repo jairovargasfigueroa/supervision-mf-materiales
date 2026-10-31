@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
 import LinearProgress from '@mui/material/LinearProgress';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
@@ -11,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import { getRouteApi } from '@tanstack/react-router';
 import { AvisoSinConexion } from '../compartido/AvisoSinConexion';
+import { BotonEscritura } from '../compartido/BotonEscritura';
 import { EstadoChip } from '../compartido/EstadoChip';
 import { EstadoError } from '../compartido/EstadoError';
 import { EstadoVacio } from '../compartido/EstadoVacio';
@@ -72,9 +72,9 @@ export function StockPagina() {
               id: 'acciones',
               header: 'Acciones',
               cell: ({ row }) => (
-                <Button size="small" onClick={() => setDialogo({ abierto: true, fila: row.original })}>
+                <BotonEscritura size="small" onClick={() => setDialogo({ abierto: true, fila: row.original })}>
                   Fijar mínimo
-                </Button>
+                </BotonEscritura>
               ),
             }),
           ]),
@@ -137,9 +137,9 @@ export function StockPagina() {
           ))}
         </TextField>
         {puedeGestionar && obraId && stock.data && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDialogo({ abierto: true })}>
+          <BotonEscritura variant="contained" startIcon={<AddIcon />} onClick={() => setDialogo({ abierto: true })}>
             Agregar material
-          </Button>
+          </BotonEscritura>
         )}
       </Stack>
 

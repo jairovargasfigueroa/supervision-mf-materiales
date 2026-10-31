@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing/react';
 import type { MockLink } from '@apollo/client/testing';
 import { ACTUALIZAR_MATERIAL, CREAR_MATERIAL, MATERIALES, type Material } from './catalogo.graphql';
@@ -131,6 +131,29 @@ describe('CatalogoPagina', () => {
       expect(await screen.findByText('CEM-IP30')).toBeTruthy();
       expect(screen.getByText('ACE-12')).toBeTruthy();
       expect(screen.getByText('Sin conexión · datos del 30/10/2026 14:05')).toBeTruthy();
+    });
+
+    it('deshabilita crear, editar, activar y desactivar con «Requiere conexión» hasta que vuelve la conexión', async () => {
+      conShell(false, { [CLAVE]: pagina([CEMENTO, FIERRO]) });
+      dibujar([listar([CEMENTO, FIERRO])]);
+      await screen.findByText('CEM-IP30');
+
+      const escritura = () => [
+        screen.getByRole('button', { name: 'Nuevo material' }),
+        ...screen.getAllByRole('button', { name: 'Editar' }),
+        screen.getByRole('button', { name: 'Desactivar' }),
+        screen.getByRole('button', { name: 'Activar' }),
+      ];
+      for (const boton of escritura()) expect((boton as HTMLButtonElement).disabled).toBe(true);
+      fireEvent.mouseOver(screen.getByRole('button', { name: 'Nuevo material' }).parentElement!);
+      expect((await screen.findByRole('tooltip')).textContent).toBe('Requiere conexión');
+
+      act(() => {
+        window.plataforma!.conexion!.enLinea = true;
+        window.dispatchEvent(new CustomEvent('plataforma:conexion', { detail: { enLinea: true } }));
+      });
+      await waitFor(() => expect(screen.queryByText(/^Sin conexión/)).toBeNull());
+      for (const boton of escritura()) expect((boton as HTMLButtonElement).disabled).toBe(false);
     });
 
     it('si el catálogo nunca se abrió en el equipo lo avisa', async () => {

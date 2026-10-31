@@ -6,4 +6,4 @@ Marca cada tarea al terminarla (con sus pruebas y su commit).
 
 - [x] *Hook* `useConsultaConRespaldo` y componente de aviso (dentro del Shadow DOM)
 - [x] Usarlo en el catálogo (`materiales`) y en el stock por obra (`stockObra`; también el selector de obras de esa pantalla)
-- [ ] Deshabilitar crear y editar material, fijar mínimo y agregar material sin conexión; pruebas
+- [x] Deshabilitar crear y editar material, fijar mínimo y agregar material sin conexión; pruebas

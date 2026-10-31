@@ -155,6 +155,20 @@ describe('StockPagina', () => {
       expect(screen.getByText('Sin conexión · datos del 30/10/2026 14:05')).toBeTruthy();
     });
 
+    it('deshabilita fijar mínimo y agregar material con «Requiere conexión»', async () => {
+      conShell(false, { [CLAVE_STOCK]: { stockObra: STOCK } });
+      dibujar([]);
+      await filasTabla(4);
+
+      const fijar = screen.getAllByRole('button', { name: 'Fijar mínimo' });
+      expect(fijar).toHaveLength(3);
+      for (const boton of fijar) expect((boton as HTMLButtonElement).disabled).toBe(true);
+      const agregar = screen.getByRole('button', { name: 'Agregar material' }) as HTMLButtonElement;
+      expect(agregar.disabled).toBe(true);
+      fireEvent.mouseOver(agregar.parentElement!);
+      expect((await screen.findByRole('tooltip')).textContent).toBe('Requiere conexión');
+    });
+
     it('si el stock de la obra nunca se abrió en el equipo lo avisa', async () => {
       conShell(false);
       dibujar([]);

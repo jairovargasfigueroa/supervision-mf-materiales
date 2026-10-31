@@ -41,6 +41,7 @@ src/
     TablaDatos.tsx             # TanStack Table 9 (rowSortingFeature) dibujada con Table de MUI; meta.numerica alinea a la derecha con cifras tabulares
     EstadoChip.tsx, EstadoVacio.tsx, EstadoError.tsx
     AvisoSinConexion.tsx       # 104: «Sin conexión · datos del dd/mm/aaaa hh:mm» o «No hay datos guardados de esta pantalla»
+    BotonEscritura.tsx         # 104: botón de una acción que escribe; sin conexión, deshabilitado con «Requiere conexión»
 build.mjs, federation.config.js, vitest.config.ts, vitest.setup.ts (scrollTo de jsdom), public/index.html
 ```
 
