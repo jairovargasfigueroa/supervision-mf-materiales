@@ -10,6 +10,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import { getRouteApi } from '@tanstack/react-router';
+import { AvisoSinConexion } from '../compartido/AvisoSinConexion';
 import { EstadoChip } from '../compartido/EstadoChip';
 import { EstadoError } from '../compartido/EstadoError';
 import { EstadoVacio } from '../compartido/EstadoVacio';
@@ -84,7 +85,11 @@ export function StockPagina() {
   const filas = stock.data?.stockObra ?? SIN_FILAS;
   const listaObras = obras.data?.obras;
 
+  // 104: el aviso de datos guardados es el del stock de la obra o, sin obra elegida, el de la lista de obras
+  const consultaDelAviso = obraId ? stock : obras;
+
   const contenido = () => {
+    if (consultaDelAviso.sinDatosGuardados) return null;
     if (!obraId) return <EstadoVacio texto="Elige una obra para ver su stock." />;
     if (stock.error && !stock.data) {
       if (codigoDeError(stock.error) === 'OBRA_NO_ENCONTRADA') return <EstadoVacio texto="Obra no encontrada" />;
@@ -140,6 +145,7 @@ export function StockPagina() {
 
       <Paper variant="outlined">
         {(stock.loading || obras.loading) && <LinearProgress aria-label="Cargando stock" />}
+        <AvisoSinConexion consulta={consultaDelAviso} />
         {stock.error && stock.data && <Alert severity="error">{mensajeDeError(stock.error)}</Alert>}
         {contenido()}
       </Paper>

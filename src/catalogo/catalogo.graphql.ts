@@ -1,5 +1,6 @@
 import { gql, type TypedDocumentNode } from '@apollo/client';
-import { useMutation, useQuery } from '@apollo/client/react';
+import { useMutation } from '@apollo/client/react';
+import { useConsultaConRespaldo } from '../nucleo/consulta-respaldo';
 
 // Operaciones del catálogo (docs/contratos.md: materiales, crearMaterial, actualizarMaterial).
 
@@ -100,9 +101,16 @@ export const ACTUALIZAR_MATERIAL: TypedDocumentNode<
   }
 `;
 
-/** Catálogo paginado; mientras llega la página nueva se sigue mostrando la anterior. */
+/**
+ * Catálogo paginado; mientras llega la página nueva se sigue mostrando la anterior. Cada página se guarda en
+ * el equipo y, sin conexión, se muestra la guardada (104).
+ */
 export function useMateriales(variables: MaterialesVariables, opciones: { omitir?: boolean } = {}) {
-  const consulta = useQuery(MATERIALES, { variables, skip: opciones.omitir, notifyOnNetworkStatusChange: true });
+  const consulta = useConsultaConRespaldo(MATERIALES, {
+    variables,
+    omitir: opciones.omitir,
+    notifyOnNetworkStatusChange: true,
+  });
   const pagina = consulta.data?.materiales ?? consulta.previousData?.materiales;
   return { ...consulta, pagina };
 }

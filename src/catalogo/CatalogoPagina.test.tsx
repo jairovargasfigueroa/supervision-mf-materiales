@@ -95,6 +95,52 @@ describe('CatalogoPagina', () => {
     expect(screen.getByText('ACE-12')).toBeTruthy();
   });
 
+  describe('sin conexión (104)', () => {
+    const CLAVE = 'Materiales:{"pagina":1,"tamano":20}';
+
+    /** Publica la conexión y un almacén en memoria como los del shell. */
+    function conShell(enLinea: boolean, guardadas: Record<string, unknown> = {}) {
+      const consultas = new Map(
+        Object.entries(guardadas).map(([clave, datos]) => [clave, { datos, guardadoEn: '2026-10-30T18:05:00.000Z' }]),
+      );
+      const almacen = {
+        guardarConsulta: vi.fn(async (clave: string, datos: unknown) => {
+          consultas.set(clave, { datos, guardadoEn: new Date().toISOString() });
+        }),
+        leerConsulta: vi.fn(async (clave: string) => consultas.get(clave) ?? null),
+      };
+      window.plataforma = {
+        ...window.plataforma!,
+        conexion: { enLinea, reportarFallo: vi.fn() },
+        almacen: almacen as never,
+      };
+      return almacen;
+    }
+
+    it('en línea guarda la página del catálogo en el equipo', async () => {
+      const almacen = conShell(true);
+      dibujar([listar([CEMENTO])]);
+      await screen.findByText('CEM-IP30');
+      await waitFor(() => expect(almacen.guardarConsulta).toHaveBeenCalledWith(CLAVE, pagina([CEMENTO])));
+      expect(screen.queryByText(/^Sin conexión/)).toBeNull();
+    });
+
+    it('muestra el catálogo guardado con el aviso y su fecha', async () => {
+      conShell(false, { [CLAVE]: pagina([CEMENTO, FIERRO]) });
+      dibujar([]);
+      expect(await screen.findByText('CEM-IP30')).toBeTruthy();
+      expect(screen.getByText('ACE-12')).toBeTruthy();
+      expect(screen.getByText('Sin conexión · datos del 30/10/2026 14:05')).toBeTruthy();
+    });
+
+    it('si el catálogo nunca se abrió en el equipo lo avisa', async () => {
+      conShell(false);
+      dibujar([]);
+      expect(await screen.findByText('No hay datos guardados de esta pantalla')).toBeTruthy();
+      expect(screen.queryByRole('table')).toBeNull();
+    });
+  });
+
   it('sin resultados muestra el estado vacío', async () => {
     dibujar([listar([])]);
     expect(await screen.findByText('Aún no hay materiales.')).toBeTruthy();

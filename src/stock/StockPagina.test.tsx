@@ -113,6 +113,56 @@ describe('StockPagina', () => {
     expect(historial.location.search).toContain(OBRA);
   });
 
+  describe('sin conexión (104)', () => {
+    const CLAVE_OBRAS = 'ObrasParaStock:{}';
+    const CLAVE_STOCK = `StockObra:{"obraId":"${OBRA}"}`;
+
+    /** Publica la conexión y un almacén en memoria como los del shell. */
+    function conShell(enLinea: boolean, guardadas: Record<string, unknown> = {}) {
+      const consultas = new Map(
+        Object.entries(guardadas).map(([clave, datos]) => [clave, { datos, guardadoEn: '2026-10-30T18:05:00.000Z' }]),
+      );
+      const almacen = {
+        guardarConsulta: vi.fn(async (clave: string, datos: unknown) => {
+          consultas.set(clave, { datos, guardadoEn: new Date().toISOString() });
+        }),
+        leerConsulta: vi.fn(async (clave: string) => consultas.get(clave) ?? null),
+      };
+      window.plataforma = {
+        ...window.plataforma!,
+        conexion: { enLinea, reportarFallo: vi.fn() },
+        almacen: almacen as never,
+      };
+      return almacen;
+    }
+
+    it('en línea guarda las obras y el stock de la obra en el equipo', async () => {
+      const almacen = conShell(true);
+      dibujar([obras, stock(STOCK)]);
+      await filasTabla();
+      await waitFor(() => expect(almacen.guardarConsulta).toHaveBeenCalledWith(CLAVE_STOCK, { stockObra: STOCK }));
+      expect(almacen.guardarConsulta).toHaveBeenCalledWith(CLAVE_OBRAS, { obras: expect.any(Array) });
+    });
+
+    it('muestra el stock guardado de la obra con el aviso y su fecha', async () => {
+      conShell(false, {
+        [CLAVE_OBRAS]: { obras: [{ __typename: 'ObraResumen', id: OBRA, nombre: 'Edificio Las Palmas' }] },
+        [CLAVE_STOCK]: { stockObra: STOCK },
+      });
+      dibujar([]);
+      const [, cemento] = await filasTabla(4);
+      expect(within(cemento).getByText('80 bolsas')).toBeTruthy();
+      expect(screen.getByText('Sin conexión · datos del 30/10/2026 14:05')).toBeTruthy();
+    });
+
+    it('si el stock de la obra nunca se abrió en el equipo lo avisa', async () => {
+      conShell(false);
+      dibujar([]);
+      expect(await screen.findByText('No hay datos guardados de esta pantalla')).toBeTruthy();
+      expect(screen.queryByRole('table')).toBeNull();
+    });
+  });
+
   it('muestra cantidad, mínimo y estado con su color (criterio 6)', async () => {
     dibujar([obras, stock(STOCK)]);
     const [, cemento, arena, ladrillo] = await filasTabla();

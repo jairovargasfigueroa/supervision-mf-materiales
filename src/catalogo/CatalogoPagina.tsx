@@ -15,6 +15,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TextField from '@mui/material/TextField';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
+import { AvisoSinConexion } from '../compartido/AvisoSinConexion';
 import { EstadoChip } from '../compartido/EstadoChip';
 import { EstadoError } from '../compartido/EstadoError';
 import { EstadoVacio } from '../compartido/EstadoVacio';
@@ -160,7 +161,9 @@ export function CatalogoPagina() {
 
       <Paper variant="outlined">
         {consulta.loading && <LinearProgress aria-label="Cargando materiales" />}
-        {consulta.error && !consulta.pagina ? (
+        {/* 104: datos del equipo con su fecha, o que esta búsqueda nunca se guardó */}
+        <AvisoSinConexion consulta={consulta} />
+        {consulta.sinDatosGuardados ? null : consulta.error && !consulta.pagina ? (
           <EstadoError alReintentar={() => void consulta.refetch()} />
         ) : (
           <>
