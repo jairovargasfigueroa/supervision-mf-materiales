@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing/react';
 import type { MockLink } from '@apollo/client/testing';
 import { ACTUALIZAR_MATERIAL, CREAR_MATERIAL, MATERIALES, type Material } from './catalogo.graphql';
@@ -93,6 +93,78 @@ describe('CatalogoPagina', () => {
 
     await waitFor(() => expect(screen.queryByText('CEM-IP30')).toBeNull());
     expect(screen.getByText('ACE-12')).toBeTruthy();
+  });
+
+  describe('sin conexión (104)', () => {
+    const CLAVE = 'Materiales:{"pagina":1,"tamano":20}';
+
+    /** Publica la conexión y un almacén en memoria como los del shell. */
+    function conShell(enLinea: boolean, guardadas: Record<string, unknown> = {}) {
+      const consultas = new Map(
+        Object.entries(guardadas).map(([clave, datos]) => [clave, { datos, guardadoEn: '2026-10-30T18:05:00.000Z' }]),
+      );
+      const almacen = {
+        guardarConsulta: vi.fn(async (clave: string, datos: unknown) => {
+          consultas.set(clave, { datos, guardadoEn: new Date().toISOString() });
+        }),
+        leerConsulta: vi.fn(async (clave: string) => consultas.get(clave) ?? null),
+      };
+      window.plataforma = {
+        ...window.plataforma!,
+        conexion: { enLinea, reportarFallo: vi.fn() },
+        almacen: almacen as never,
+      };
+      return almacen;
+    }
+
+    it('en línea guarda la página del catálogo en el equipo', async () => {
+      const almacen = conShell(true);
+      dibujar([listar([CEMENTO])]);
+      await screen.findByText('CEM-IP30');
+      await waitFor(() => expect(almacen.guardarConsulta).toHaveBeenCalledWith(CLAVE, pagina([CEMENTO])));
+      expect(screen.queryByText(/^Sin conexión/)).toBeNull();
+    });
+
+    it('muestra el catálogo guardado con el aviso y su fecha', async () => {
+      conShell(false, { [CLAVE]: pagina([CEMENTO, FIERRO]) });
+      dibujar([]);
+      expect(await screen.findByText('CEM-IP30')).toBeTruthy();
+      expect(screen.getByText('ACE-12')).toBeTruthy();
+      expect(screen.getByText('Sin conexión · datos del 30/10/2026 14:05')).toBeTruthy();
+    });
+
+    it('deshabilita crear, editar, activar y desactivar con «Requiere conexión» hasta que vuelve la conexión', async () => {
+      conShell(false, { [CLAVE]: pagina([CEMENTO, FIERRO]) });
+      dibujar([listar([CEMENTO, FIERRO])]);
+      await screen.findByText('CEM-IP30');
+
+      const escritura = () => [
+        screen.getByRole('button', { name: 'Nuevo material' }),
+        ...screen.getAllByRole('button', { name: 'Editar' }),
+        screen.getByRole('button', { name: 'Desactivar' }),
+        screen.getByRole('button', { name: 'Activar' }),
+      ];
+      for (const boton of escritura()) expect((boton as HTMLButtonElement).disabled).toBe(true);
+      fireEvent.mouseOver(screen.getByRole('button', { name: 'Nuevo material' }).parentElement!);
+      expect((await screen.findByRole('tooltip')).textContent).toBe('Requiere conexión');
+
+      act(() => {
+        window.plataforma!.conexion!.enLinea = true;
+        window.dispatchEvent(new CustomEvent('plataforma:conexion', { detail: { enLinea: true } }));
+      });
+      // Vuelve a pedir el catálogo a la red y habilita las acciones
+      await waitFor(() => {
+        for (const boton of escritura()) expect((boton as HTMLButtonElement).disabled).toBe(false);
+      });
+      expect(screen.queryByText(/^Sin conexión/)).toBeNull();
+    });
+
+    it('si el catálogo nunca se abrió en el equipo lo avisa', async () => {
+      conShell(false);
+      dibujar([]);
+      expect(await screen.findByText('No hay datos guardados de esta pantalla')).toBeTruthy();
+      expect(screen.queryByRole('table')).toBeNull();
+    });
   });
 
   it('sin resultados muestra el estado vacío', async () => {

@@ -4,7 +4,7 @@ Microfrontend del ERP para materiales: catálogo, stock mínimo, stock por obra 
 
 Parte de la «Plataforma de supervisión de obras». Si existe `../../CLAUDE.md` (carpeta que agrupa todos los proyectos), léelo primero: tiene las reglas transversales, el plan y los contratos generales.
 
-**Estado:** Native Federation configurado, tema MUI dentro del Shadow DOM, `formato.ts`, estados vacío y error, y lectura de la sesión del shell (`nucleo/sesion.ts`, `nucleo/configuracion.ts`; sin shell muestra «Abre esta pantalla desde el ERP») (fase 1). 003: Apollo Client con el token del shell, rutas `/materiales/catalogo` y `/materiales/stock`, catálogo (tabla con búsqueda, formulario lateral, activar/desactivar) y stock por obra (estados con color, fijar mínimo, agregar material); las acciones de escritura solo para `admin`. No implementes una funcionalidad sin su especificación aprobada en `docs/specs/`.
+**Estado:** Native Federation configurado, tema MUI dentro del Shadow DOM, `formato.ts`, estados vacío y error, y lectura de la sesión del shell (`nucleo/sesion.ts`, `nucleo/configuracion.ts`; sin shell muestra «Abre esta pantalla desde el ERP») (fase 1). 003: Apollo Client con el token del shell, rutas `/materiales/catalogo` y `/materiales/stock`, catálogo (tabla con búsqueda, formulario lateral, activar/desactivar) y stock por obra (estados con color, fijar mínimo, agregar material); las acciones de escritura solo para `admin`. 104: catálogo y stock con respaldo en el almacén del shell (`useConsultaConRespaldo`, aviso «Sin conexión · datos del…») y acciones de escritura deshabilitadas sin conexión (`BotonEscritura`). No implementes una funcionalidad sin su especificación aprobada en `docs/specs/`.
 
 ## Stack
 

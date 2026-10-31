@@ -1,5 +1,6 @@
 import { gql, type TypedDocumentNode } from '@apollo/client';
-import { useMutation, useQuery } from '@apollo/client/react';
+import { useMutation } from '@apollo/client/react';
+import { useConsultaConRespaldo } from '../nucleo/consulta-respaldo';
 import type { EstadoStock } from './estado-stock';
 
 // Operaciones del stock por obra (docs/contratos.md: obras, stockObra, definirStockMinimo).
@@ -47,12 +48,14 @@ export const DEFINIR_STOCK_MINIMO: TypedDocumentNode<
   }
 `;
 
+// Las consultas de la pantalla se guardan en el equipo y, sin conexión, se muestra lo guardado (104);
+// el selector de obra también, para poder elegir sin conexión una obra ya consultada.
 export function useObras() {
-  return useQuery(OBRAS);
+  return useConsultaConRespaldo(OBRAS);
 }
 
 export function useStockObra(obraId: string | undefined) {
-  return useQuery(STOCK_OBRA, { variables: { obraId: obraId ?? '' }, skip: !obraId });
+  return useConsultaConRespaldo(STOCK_OBRA, { variables: { obraId: obraId ?? '' }, omitir: !obraId });
 }
 
 /** Fijar el mínimo vuelve a pedir el stock de la obra (puede aparecer una fila nueva con cantidad 0). */

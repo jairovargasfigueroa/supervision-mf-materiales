@@ -13,6 +13,7 @@ import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { useForm } from '@tanstack/react-form';
+import { BotonEscritura } from '../compartido/BotonEscritura';
 import { codigoDeError, mensajeDeError } from '../nucleo/errores';
 import { NOMBRE_TIPO, TIPOS_MATERIAL, useGuardarMaterial, type Material } from './catalogo.graphql';
 import {
@@ -300,9 +301,9 @@ export function MaterialFormulario({ abierto, material, alCerrar, alGuardar }: P
           <formulario.Subscribe
             selector={(estado) => estado.isSubmitting}
             children={(enviando) => (
-              <Button type="submit" variant="contained" disabled={enviando}>
+              <BotonEscritura type="submit" variant="contained" disabled={enviando}>
                 {enviando ? 'Guardando…' : 'Guardar material'}
-              </Button>
+              </BotonEscritura>
             )}
           />
         </Stack>

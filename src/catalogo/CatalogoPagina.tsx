@@ -15,6 +15,8 @@ import TablePagination from '@mui/material/TablePagination';
 import TextField from '@mui/material/TextField';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
+import { AvisoSinConexion } from '../compartido/AvisoSinConexion';
+import { BotonEscritura } from '../compartido/BotonEscritura';
 import { EstadoChip } from '../compartido/EstadoChip';
 import { EstadoError } from '../compartido/EstadoError';
 import { EstadoVacio } from '../compartido/EstadoVacio';
@@ -103,17 +105,17 @@ export function CatalogoPagina() {
                 const material = row.original;
                 return (
                   <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
-                    <Button size="small" onClick={() => setFormulario({ abierto: true, material })}>
+                    <BotonEscritura size="small" onClick={() => setFormulario({ abierto: true, material })}>
                       Editar
-                    </Button>
+                    </BotonEscritura>
                     {material.activo ? (
-                      <Button size="small" color="error" onClick={() => setPorDesactivar(material)}>
+                      <BotonEscritura size="small" color="error" onClick={() => setPorDesactivar(material)}>
                         Desactivar
-                      </Button>
+                      </BotonEscritura>
                     ) : (
-                      <Button size="small" onClick={() => void cambiarActivo(material, true)}>
+                      <BotonEscritura size="small" onClick={() => void cambiarActivo(material, true)}>
                         Activar
-                      </Button>
+                      </BotonEscritura>
                     )}
                   </Stack>
                 );
@@ -152,15 +154,17 @@ export function CatalogoPagina() {
           }}
         />
         {puedeGestionar && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormulario({ abierto: true })}>
+          <BotonEscritura variant="contained" startIcon={<AddIcon />} onClick={() => setFormulario({ abierto: true })}>
             Nuevo material
-          </Button>
+          </BotonEscritura>
         )}
       </Stack>
 
       <Paper variant="outlined">
         {consulta.loading && <LinearProgress aria-label="Cargando materiales" />}
-        {consulta.error && !consulta.pagina ? (
+        {/* 104: datos del equipo con su fecha, o que esta búsqueda nunca se guardó */}
+        <AvisoSinConexion consulta={consulta} />
+        {consulta.sinDatosGuardados ? null : consulta.error && !consulta.pagina ? (
           <EstadoError alReintentar={() => void consulta.refetch()} />
         ) : (
           <>
@@ -220,13 +224,13 @@ export function CatalogoPagina() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPorDesactivar(undefined)}>Cancelar</Button>
-          <Button
+          <BotonEscritura
             color="error"
             variant="contained"
             onClick={() => porDesactivar && void cambiarActivo(porDesactivar, false)}
           >
             Desactivar
-          </Button>
+          </BotonEscritura>
         </DialogActions>
       </Dialog>
 

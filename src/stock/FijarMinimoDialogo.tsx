@@ -14,6 +14,7 @@ import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 import { useMateriales, type Material } from '../catalogo/catalogo.graphql';
 import { leerPrecio } from '../catalogo/material.esquema';
+import { BotonEscritura } from '../compartido/BotonEscritura';
 import { mensajeDeError } from '../nucleo/errores';
 import { formatearCantidad } from '../nucleo/formato';
 import { useDefinirMinimo, type StockMaterial } from './stock.graphql';
@@ -188,9 +189,9 @@ export function FijarMinimoDialogo({ abierto, obraId, fila, yaEnObra, alCerrar, 
           <formulario.Subscribe
             selector={(estado) => estado.isSubmitting}
             children={(enviando) => (
-              <Button type="submit" variant="contained" disabled={enviando}>
+              <BotonEscritura type="submit" variant="contained" disabled={enviando}>
                 {enviando ? 'Guardando…' : fila ? 'Fijar mínimo' : 'Agregar'}
-              </Button>
+              </BotonEscritura>
             )}
           />
         </DialogActions>
