@@ -51,6 +51,8 @@ interface OpcionesRespaldo<TVariables> {
   variables?: TVariables;
   omitir?: boolean;
   notifyOnNetworkStatusChange?: boolean;
+  /** `'all'` entrega los datos parciales junto con sus errores (se muestran, pero no se guardan). */
+  errorPolicy?: 'none' | 'all';
 }
 
 type Respaldo<TData> =
@@ -75,7 +77,7 @@ export interface ResultadoConRespaldo<TData> {
 
 export function useConsultaConRespaldo<TData, TVariables extends OperationVariables = OperationVariables>(
   documento: TypedDocumentNode<TData, TVariables>,
-  { variables, omitir = false, notifyOnNetworkStatusChange }: OpcionesRespaldo<TVariables> = {},
+  { variables, omitir = false, notifyOnNetworkStatusChange, errorPolicy }: OpcionesRespaldo<TVariables> = {},
 ): ResultadoConRespaldo<TData> {
   const almacen = obtenerAlmacen();
   const enLinea = useEnLinea();
@@ -87,6 +89,7 @@ export function useConsultaConRespaldo<TData, TVariables extends OperationVariab
     skip: omitir || sinConexion,
     fetchPolicy: 'network-only',
     notifyOnNetworkStatusChange,
+    errorPolicy,
   });
 
   const falloDeRed = !!almacen && !omitir && !sinConexion && !!consulta.error && esFalloDeRed(consulta.error);
@@ -146,7 +149,8 @@ export function useConsultaConRespaldo<TData, TVariables extends OperationVariab
     previousData: undefined,
     loading: leido === undefined,
     error: undefined,
-    refetch: () => consulta.refetch(),
+    // Sin conexión no se pide a la red; tras un fallo de red sí se reintenta
+    refetch: sinConexion ? () => Promise.resolve(undefined) : () => consulta.refetch(),
     desdeEquipo: !!leido,
     guardadoEn: leido?.guardadoEn,
     sinDatosGuardados: leido === null,

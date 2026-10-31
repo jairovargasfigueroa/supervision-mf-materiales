@@ -152,8 +152,11 @@ describe('CatalogoPagina', () => {
         window.plataforma!.conexion!.enLinea = true;
         window.dispatchEvent(new CustomEvent('plataforma:conexion', { detail: { enLinea: true } }));
       });
-      await waitFor(() => expect(screen.queryByText(/^Sin conexión/)).toBeNull());
-      for (const boton of escritura()) expect((boton as HTMLButtonElement).disabled).toBe(false);
+      // Vuelve a pedir el catálogo a la red y habilita las acciones
+      await waitFor(() => {
+        for (const boton of escritura()) expect((boton as HTMLButtonElement).disabled).toBe(false);
+      });
+      expect(screen.queryByText(/^Sin conexión/)).toBeNull();
     });
 
     it('si el catálogo nunca se abrió en el equipo lo avisa', async () => {

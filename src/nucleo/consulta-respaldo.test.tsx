@@ -59,8 +59,8 @@ function cambiarConexion(enLinea: boolean) {
   });
 }
 
-function Prueba() {
-  const consulta = useConsultaConRespaldo(MATERIAL, { variables: { id: 'm1' } });
+function Prueba({ errorPolicy }: { errorPolicy?: 'all' }) {
+  const consulta = useConsultaConRespaldo(MATERIAL, { variables: { id: 'm1' }, errorPolicy });
   return (
     <div>
       <AvisoSinConexion consulta={consulta} />
@@ -80,10 +80,10 @@ const falloDeRed: MockLink.MockedResponse = {
   error: new TypeError('Failed to fetch'),
 };
 
-function dibujar(mocks: MockLink.MockedResponse[]) {
+function dibujar(mocks: MockLink.MockedResponse[], errorPolicy?: 'all') {
   render(
     <MockedProvider mocks={mocks}>
-      <Prueba />
+      <Prueba errorPolicy={errorPolicy} />
     </MockedProvider>,
   );
 }
@@ -190,6 +190,28 @@ describe('useConsultaConRespaldo', () => {
     expect(screen.getByTestId('origen').textContent).toBe('red');
     expect(almacen.guardarConsulta).not.toHaveBeenCalled();
     expect(conexion.reportarFallo).not.toHaveBeenCalled();
+  });
+
+  it("con errorPolicy 'all' muestra la respuesta parcial con su error y no la guarda", async () => {
+    const { almacen } = crearAlmacen({ [CLAVE]: { datos: datos('Cemento guardado'), guardadoEn: GUARDADO_EN } });
+    publicarShell(almacen);
+    dibujar(
+      [
+        {
+          request: { query: MATERIAL, variables: { id: 'm1' } },
+          result: {
+            data: datos('Cemento parcial'),
+            errors: [{ message: 'x', extensions: { codigo: 'SERVICIO_NO_DISPONIBLE', servicio: 'finanzas' } }],
+          },
+        },
+      ],
+      'all',
+    );
+
+    await waitFor(() => expect(nombre()).toBe('Cemento parcial'));
+    expect(screen.getByTestId('error').textContent).toBe('con error');
+    expect(screen.getByTestId('origen').textContent).toBe('red');
+    expect(almacen.guardarConsulta).not.toHaveBeenCalled();
   });
 
   it('al volver la conexión vuelve a la red y guarda la respuesta nueva', async () => {
