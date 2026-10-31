@@ -31,6 +31,8 @@ src/
     errores.ts                 # extensions.codigo → mensaje
     permisos.ts                # roles efectivos del ERP (solo los internos) y puedeGestionarMateriales (solo admin)
     formato.ts
+    conexion.ts                # 104: window.plataforma.conexion y almacen del shell, useEnLinea (evento plataforma:conexion)
+    consulta-respaldo.ts       # 104: useConsultaConRespaldo (network-only en línea y guarda; lo guardado sin conexión o ante fallo de red)
   catalogo/
     CatalogoPagina.tsx (tabla paginada en el gateway, búsqueda con espera de 300 ms, activar/desactivar con confirmación), MaterialFormulario.tsx (Drawer lateral con TanStack Form), material.esquema.ts (Zod), catalogo.graphql.ts (operaciones, tipos y hooks useMateriales, useGuardarMaterial)
   stock/
@@ -38,6 +40,7 @@ src/
   compartido/
     TablaDatos.tsx             # TanStack Table 9 (rowSortingFeature) dibujada con Table de MUI; meta.numerica alinea a la derecha con cifras tabulares
     EstadoChip.tsx, EstadoVacio.tsx, EstadoError.tsx
+    AvisoSinConexion.tsx       # 104: «Sin conexión · datos del dd/mm/aaaa hh:mm» o «No hay datos guardados de esta pantalla»
 build.mjs, federation.config.js, vitest.config.ts, vitest.setup.ts (scrollTo de jsdom), public/index.html
 ```
 
