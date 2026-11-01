@@ -1,15 +1,22 @@
+import { useState } from 'react';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { AvisoSinConexion } from '../compartido/AvisoSinConexion';
+import { BotonEscritura } from '../compartido/BotonEscritura';
 import { EstadoChip } from '../compartido/EstadoChip';
+import { EstadoError } from '../compartido/EstadoError';
+import { mensajeDeError } from '../nucleo/errores';
 import { formatearFechaHora } from '../nucleo/formato';
 import { SEVERIDAD, textoTipoHallazgo, useControlMateriales, type Hallazgo, type Sugerencia } from './agentes.graphql';
+import { DecisionSugerenciaDialogo, type ModoDecision } from './DecisionSugerenciaDialogo';
 
 // Panel «Control de materiales» del stock por obra (502, criterio 18): hallazgos vigentes (los de la última
 // ejecución terminada del agente) y sugerencias pendientes de la obra elegida. El servicio de IA solo devuelve
-// lo que el usuario puede ver (el residente, sus obras).
+// lo que el usuario puede ver (el residente, sus obras). Si IA no responde, solo este panel muestra «No disponible
+// por el momento» (criterio 21); el stock de la obra sigue igual.
 
 function HallazgoItem({ h }: { h: Hallazgo }) {
   return (
@@ -38,9 +45,10 @@ function HallazgoItem({ h }: { h: Hallazgo }) {
 
 interface PropsSugerencia {
   s: Sugerencia;
+  alDecidir: (modo: ModoDecision) => void;
 }
 
-function SugerenciaItem({ s }: PropsSugerencia) {
+function SugerenciaItem({ s, alDecidir }: PropsSugerencia) {
   return (
     <Paper component="li" variant="outlined" aria-label={`Sugerencia: ${s.accionTexto}`} sx={{ p: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
@@ -52,6 +60,14 @@ function SugerenciaItem({ s }: PropsSugerencia) {
       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
         {s.descripcion}
       </Typography>
+      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+        <BotonEscritura size="small" variant="contained" onClick={() => alDecidir('aprobar')}>
+          Aprobar
+        </BotonEscritura>
+        <BotonEscritura size="small" variant="outlined" color="error" onClick={() => alDecidir('rechazar')}>
+          Rechazar
+        </BotonEscritura>
+      </Box>
     </Paper>
   );
 }
@@ -65,10 +81,16 @@ interface Props {
 export function ControlMaterialesPanel({ obraId }: Props) {
   const consulta = useControlMateriales(obraId);
   const datos = consulta.data;
+  const [decidiendo, setDecidiendo] = useState<{ sugerencia: Sugerencia; modo: ModoDecision }>();
+
+  const recargar = () => void consulta.refetch().catch(() => undefined);
 
   const contenido = () => {
     if (consulta.sinDatosGuardados) return <AvisoSinConexion consulta={consulta} />;
-    if (!datos) return <LinearProgress aria-label="Cargando control de materiales" />;
+    if (!datos) {
+      if (consulta.error) return <EstadoError alReintentar={recargar} />;
+      return <LinearProgress aria-label="Cargando control de materiales" />;
+    }
     return (
       <>
         <Typography variant="subtitle2" component="h3" sx={{ mb: 1 }}>
@@ -95,7 +117,7 @@ export function ControlMaterialesPanel({ obraId }: Props) {
         ) : (
           <Box component="ul" aria-label="Sugerencias pendientes" sx={LISTA}>
             {datos.sugerencias.map((s) => (
-              <SugerenciaItem key={s.id} s={s} />
+              <SugerenciaItem key={s.id} s={s} alDecidir={(modo) => setDecidiendo({ sugerencia: s, modo })} />
             ))}
           </Box>
         )}
@@ -113,7 +135,20 @@ export function ControlMaterialesPanel({ obraId }: Props) {
           <AvisoSinConexion consulta={consulta} />
         </Box>
       )}
+      {consulta.error && datos && (
+        <Alert severity="error" sx={{ mb: 1 }}>
+          {mensajeDeError(consulta.error)}
+        </Alert>
+      )}
       {contenido()}
+      {decidiendo && (
+        <DecisionSugerenciaDialogo
+          sugerencia={decidiendo.sugerencia}
+          modo={decidiendo.modo}
+          alCerrar={() => setDecidiendo(undefined)}
+          alDecidir={recargar}
+        />
+      )}
     </Paper>
   );
 }

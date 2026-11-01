@@ -1,4 +1,5 @@
 import { gql, type TypedDocumentNode } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import type { TonoEstado } from '../compartido/EstadoChip';
 import { useConsultaConRespaldo } from '../nucleo/consulta-respaldo';
 
@@ -63,6 +64,11 @@ export function textoTipoHallazgo(tipo: string): string {
   return TIPO_HALLAZGO[tipo] ?? tipo;
 }
 
+/** Largos de la decisión (502, criterios 12 y 13). */
+export const COMENTARIO_MAXIMO = 300;
+export const MOTIVO_MINIMO = 10;
+export const MOTIVO_MAXIMO = 500;
+
 const CAMPOS_SUGERENCIA = `
   id
   ejecucionId
@@ -119,4 +125,32 @@ export function variablesControlMateriales(obraId: string): VariablesControlMate
 
 export function useControlMateriales(obraId: string) {
   return useConsultaConRespaldo(CONTROL_MATERIALES, { variables: variablesControlMateriales(obraId) });
+}
+
+/** Aprobar solo registra la decisión (502, criterio 12): no se crea ni envía nada en otro servicio. */
+export const APROBAR_SUGERENCIA: TypedDocumentNode<
+  { aprobarSugerencia: Sugerencia },
+  { id: string; comentario?: string }
+> = gql`
+  mutation AprobarSugerencia($id: ID!, $comentario: String) {
+    aprobarSugerencia(id: $id, comentario: $comentario) {
+      ${CAMPOS_SUGERENCIA}
+    }
+  }
+`;
+
+export const RECHAZAR_SUGERENCIA: TypedDocumentNode<{ rechazarSugerencia: Sugerencia }, { id: string; motivo: string }> = gql`
+  mutation RechazarSugerencia($id: ID!, $motivo: String!) {
+    rechazarSugerencia(id: $id, motivo: $motivo) {
+      ${CAMPOS_SUGERENCIA}
+    }
+  }
+`;
+
+export function useAprobarSugerencia() {
+  return useMutation(APROBAR_SUGERENCIA);
+}
+
+export function useRechazarSugerencia() {
+  return useMutation(RECHAZAR_SUGERENCIA);
 }

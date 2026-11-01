@@ -17,6 +17,11 @@ const MENSAJES: Record<string, string> = {
   MATERIAL_NO_ENCONTRADO: 'No encontramos ese material en el catálogo.',
   MATERIAL_INACTIVO: 'El material está desactivado; no se puede usar en movimientos ni fijarle un mínimo.',
   OBRA_NO_ENCONTRADA: 'Obra no encontrada',
+  // 502: decidir una sugerencia del agente de materiales
+  SUGERENCIA_NO_ENCONTRADA: 'No encontramos esa sugerencia o no tienes acceso a ella.',
+  SUGERENCIA_YA_DECIDIDA: 'Esta sugerencia ya fue aprobada o rechazada. Recarga la lista.',
+  COMENTARIO_INVALIDO: 'Revisa el comentario.',
+  MOTIVO_INVALIDO: 'El motivo debe tener entre 10 y 500 caracteres.',
 };
 
 const SIN_CONEXION = 'No hay conexión con el servidor. Revisa tu conexión a internet e intenta de nuevo.';
@@ -54,4 +59,18 @@ export function mensajeDeError(error: unknown, datos: Record<string, string> = {
   if (plantilla) return plantilla.replace(/\{(\w+)\}/g, (marca, clave: string) => datos[clave] ?? marca);
   if (CombinedGraphQLErrors.is(error) || ServerError.is(error)) return MENSAJES['ERROR_INTERNO'];
   return SIN_CONEXION;
+}
+
+/** Errores por campo de una respuesta `400` o `422` (`extensions.errores[]`, docs/mensajes.md). */
+export function erroresDeCampo(error: unknown): { campo: string; mensaje: string }[] {
+  if (!CombinedGraphQLErrors.is(error)) return [];
+  for (const e of error.errors) {
+    const errores = e.extensions?.['errores'];
+    if (Array.isArray(errores)) {
+      return errores.filter(
+        (x): x is { campo: string; mensaje: string } => typeof x?.campo === 'string' && typeof x?.mensaje === 'string',
+      );
+    }
+  }
+  return [];
 }
