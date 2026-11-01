@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { puedeGestionarMateriales, rolesEfectivos } from './permisos';
+import { puedeGestionarMateriales, puedeVerAgentes, rolesEfectivos } from './permisos';
 
 describe('permisos de materiales', () => {
   it('solo admin puede gestionar (criterios 2 y 7)', () => {
@@ -18,5 +18,14 @@ describe('permisos de materiales', () => {
 
   it('un rol con nombre parecido no cuenta', () => {
     expect(puedeGestionarMateriales(['administrador', 'Admin'])).toBe(false);
+  });
+
+  it('el panel de agentes es de admin, gerente y residente (502, criterios 15 y 18)', () => {
+    expect(puedeVerAgentes(['admin'])).toBe(true);
+    expect(puedeVerAgentes(['gerente'])).toBe(true);
+    expect(puedeVerAgentes(['offline_access', 'residente'])).toBe(true);
+    expect(puedeVerAgentes(['almacenero'])).toBe(false);
+    expect(puedeVerAgentes(['maestro', 'cliente'])).toBe(false);
+    expect(puedeVerAgentes([])).toBe(false);
   });
 });

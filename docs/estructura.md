@@ -42,6 +42,7 @@ src/
     ControlMaterialesPanel.tsx # hallazgos vigentes (tipo, severidad, situación, causa, evidencia) y sugerencias pendientes con «Aprobar» y «Rechazar» (BotonEscritura); si IA no responde, «No disponible por el momento» solo en el panel; lo escrito por el agente se muestra como texto
     DecisionSugerenciaDialogo.tsx # aprobar (comentario opcional, hasta 300) o rechazar (motivo de 10 a 500, con contador) con TanStack Form; SUGERENCIA_YA_DECIDIDA o SUGERENCIA_NO_ENCONTRADA recargan el panel
     decision.esquema.ts        # Zod de la decisión (texto recortado)
+    ControlMaterialesPanel.test.tsx, decision.esquema.test.ts
   compartido/
     TablaDatos.tsx             # TanStack Table 9 (rowSortingFeature) dibujada con Table de MUI; meta.numerica alinea a la derecha con cifras tabulares
     EstadoChip.tsx, EstadoVacio.tsx, EstadoError.tsx

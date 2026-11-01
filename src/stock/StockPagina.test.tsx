@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { MockedProvider } from '@apollo/client/testing/react';
 import type { MockLink } from '@apollo/client/testing';
 import { createMemoryHistory, RouterProvider } from '@tanstack/react-router';
+import { CONTROL_MATERIALES, variablesControlMateriales } from '../agentes/agentes.graphql';
 import { MATERIALES, type Material } from '../catalogo/catalogo.graphql';
 import { crearRouter } from '../router';
 import { DEFINIR_STOCK_MINIMO, OBRAS, STOCK_OBRA, type StockMaterial } from './stock.graphql';
@@ -325,5 +326,58 @@ describe('StockPagina', () => {
 
     expect(await screen.findByText('Mínimo de Yeso: 20 bolsas')).toBeTruthy();
     expect(await filasTabla(5)).toHaveLength(5);
+  });
+
+  describe('panel «Control de materiales» (502)', () => {
+    const controlMateriales = (resultado: MockLink.MockedResponse['result']): MockLink.MockedResponse => ({
+      request: { query: CONTROL_MATERIALES, variables: variablesControlMateriales(OBRA) },
+      result: resultado,
+    });
+    const hallazgo = {
+      __typename: 'Hallazgo',
+      ejecucionId: 'e1',
+      agente: 'CONTROL_MATERIALES',
+      obraId: OBRA,
+      obraNombre: 'Edificio Las Palmas',
+      tipo: 'STOCK_BAJO',
+      severidad: 'ALTA',
+      situacion: 'Cemento IP-30: 80 bolsas, mínimo 100',
+      causaProbable: 'No determinada',
+      evidencia: [{ __typename: 'Evidencia', herramienta: 'stock_obra', dato: 'cantidad 80, mínimo 100' }],
+      detectadoEn: '2027-04-20T10:01:12Z',
+    };
+
+    it('residente ve el panel de su obra debajo del stock (criterio 18)', async () => {
+      sesionCon('residente');
+      dibujar([obras, stock(STOCK), controlMateriales({ data: { hallazgos: [hallazgo], sugerencias: [] } })]);
+      await filasTabla();
+      const panel = within(await screen.findByRole('region', { name: 'Control de materiales' }));
+      expect(await panel.findByText('Cemento IP-30: 80 bolsas, mínimo 100')).toBeTruthy();
+    });
+
+    it('si IA no responde, solo el panel dice «No disponible por el momento» y el stock sigue (criterio 21)', async () => {
+      dibujar([
+        obras,
+        stock(STOCK),
+        controlMateriales({
+          errors: [{ message: 'x', extensions: { codigo: 'SERVICIO_NO_DISPONIBLE', servicio: 'ia' } }],
+        }),
+      ]);
+      expect(await filasTabla()).toHaveLength(4);
+      const panel = within(await screen.findByRole('region', { name: 'Control de materiales' }));
+      expect(await panel.findByText('No disponible por el momento.')).toBeTruthy();
+    });
+
+    it('sin obra elegida, o para un rol sin acceso a los agentes, no aparece', async () => {
+      dibujar([obras], '/materiales/stock');
+      expect(await screen.findByText('Elige una obra para ver su stock.')).toBeTruthy();
+      expect(screen.queryByRole('region', { name: 'Control de materiales' })).toBeNull();
+      cleanup();
+
+      sesionCon('almacenero');
+      dibujar([obras, stock(STOCK)]);
+      await filasTabla();
+      expect(screen.queryByRole('region', { name: 'Control de materiales' })).toBeNull();
+    });
   });
 });

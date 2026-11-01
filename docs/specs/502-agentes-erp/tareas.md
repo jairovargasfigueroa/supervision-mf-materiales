@@ -6,4 +6,4 @@ Marca cada tarea al terminarla (con sus pruebas y su commit).
 
 - [x] Panel «Control de materiales» en la pantalla de stock por obra: hallazgos vigentes y sugerencias pendientes del agente de materiales
 - [x] Diálogos de aprobar y rechazar con sus mutaciones; aviso si IA no responde
-- [ ] Pruebas
+- [x] Pruebas
