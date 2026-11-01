@@ -90,7 +90,7 @@ describe('ControlMaterialesPanel', () => {
     expect(within(h).getByText('Causa probable: Consumo de la losa mayor al previsto')).toBeTruthy();
     expect(within(h).getByText('stock_obra: cantidad 80, mínimo 100, estado BAJO')).toBeTruthy();
     expect(within(h).getByText('20/04/2027 06:01')).toBeTruthy();
-    expect(within(h).getByText('Severidad alta').closest('[data-tono]')?.getAttribute('data-tono')).toBe('error');
+    expect(within(h).getByText('Alta').closest('[data-tono]')?.getAttribute('data-tono')).toBe('error');
 
     const s = within(await lista('Sugerencias pendientes')).getByRole('listitem');
     expect(within(s).getByText('Hacer un conteo físico del material en el depósito de la obra')).toBeTruthy();
@@ -101,8 +101,8 @@ describe('ControlMaterialesPanel', () => {
 
   it('sin hallazgos ni sugerencias lo dice', async () => {
     dibujar([panel([], [])]);
-    expect(await screen.findByText('El agente no encontró problemas en esta obra.')).toBeTruthy();
-    expect(screen.getByText('No hay sugerencias pendientes.')).toBeTruthy();
+    expect(await screen.findByText('No hay hallazgos vigentes en esta obra.')).toBeTruthy();
+    expect(screen.getByText('No hay sugerencias pendientes en esta obra.')).toBeTruthy();
   });
 
   it('el texto del agente con etiquetas HTML se muestra como texto', async () => {
@@ -119,7 +119,7 @@ describe('ControlMaterialesPanel', () => {
       { request: panel([], []).request, result: errorIa('SERVICIO_NO_DISPONIBLE') },
       panel([hallazgo()], []),
     ]);
-    expect(await screen.findByText('No disponible por el momento.')).toBeTruthy();
+    expect(await screen.findByText('No disponible por el momento')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
     expect(await screen.findByText('Cemento IP-30: 80 bolsas, mínimo 100')).toBeTruthy();
   });
@@ -144,7 +144,7 @@ describe('ControlMaterialesPanel', () => {
     fireEvent.click(dialogo.getByRole('button', { name: 'Aprobar' }));
 
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(await screen.findByText('No hay sugerencias pendientes.')).toBeTruthy();
+    expect(await screen.findByText('No hay sugerencias pendientes en esta obra.')).toBeTruthy();
   });
 
   it('aprobar sin comentario no lo envía', async () => {
@@ -159,7 +159,7 @@ describe('ControlMaterialesPanel', () => {
     fireEvent.click(within(await lista('Sugerencias pendientes')).getByRole('button', { name: 'Aprobar' }));
     const dialogo = within(await screen.findByRole('dialog'));
     fireEvent.click(dialogo.getByRole('button', { name: 'Aprobar' }));
-    expect(await screen.findByText('No hay sugerencias pendientes.')).toBeTruthy();
+    expect(await screen.findByText('No hay sugerencias pendientes en esta obra.')).toBeTruthy();
   });
 
   it('rechazar exige un motivo de 10 a 500 caracteres con contador (criterio 13)', async () => {
@@ -186,7 +186,7 @@ describe('ControlMaterialesPanel', () => {
     fireEvent.change(campo, { target: { value: motivo } });
     expect(await dialogo.findByText('25 / 500 (mínimo 10)')).toBeTruthy();
     fireEvent.click(dialogo.getByRole('button', { name: 'Rechazar' }));
-    expect(await screen.findByText('No hay sugerencias pendientes.')).toBeTruthy();
+    expect(await screen.findByText('No hay sugerencias pendientes en esta obra.')).toBeTruthy();
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
@@ -201,7 +201,7 @@ describe('ControlMaterialesPanel', () => {
     fireEvent.click(dialogo.getByRole('button', { name: 'Aprobar' }));
 
     expect(await dialogo.findByText('Esta sugerencia ya fue aprobada o rechazada. Recarga la lista.')).toBeTruthy();
-    expect(await screen.findByText('No hay sugerencias pendientes.')).toBeTruthy();
+    expect(await screen.findByText('No hay sugerencias pendientes en esta obra.')).toBeTruthy();
   });
 
   it('COMENTARIO_INVALIDO muestra arriba «Revisa el comentario.» y la regla junto al campo', async () => {

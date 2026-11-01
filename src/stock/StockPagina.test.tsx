@@ -365,7 +365,7 @@ describe('StockPagina', () => {
       ]);
       expect(await filasTabla()).toHaveLength(4);
       const panel = within(await screen.findByRole('region', { name: 'Control de materiales' }));
-      expect(await panel.findByText('No disponible por el momento.')).toBeTruthy();
+      expect(await panel.findByText('No disponible por el momento')).toBeTruthy();
     });
 
     it('sin obra elegida, o para un rol sin acceso a los agentes, no aparece', async () => {

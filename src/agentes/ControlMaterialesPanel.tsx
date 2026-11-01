@@ -23,7 +23,7 @@ function HallazgoItem({ h }: { h: Hallazgo }) {
     <Paper component="li" variant="outlined" aria-label={`Hallazgo: ${textoTipoHallazgo(h.tipo)}`} sx={{ p: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
         <Typography sx={{ fontWeight: 600 }}>{textoTipoHallazgo(h.tipo)}</Typography>
-        <EstadoChip etiqueta={`Severidad ${SEVERIDAD[h.severidad].etiqueta.toLowerCase()}`} tono={SEVERIDAD[h.severidad].tono} />
+        <EstadoChip etiqueta={SEVERIDAD[h.severidad].etiqueta} tono={SEVERIDAD[h.severidad].tono} />
         <Typography variant="body2" sx={{ ml: 'auto', color: 'text.secondary' }}>
           {formatearFechaHora(h.detectadoEn)}
         </Typography>
@@ -98,7 +98,7 @@ export function ControlMaterialesPanel({ obraId }: Props) {
         </Typography>
         {datos.hallazgos.length === 0 ? (
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-            El agente no encontró problemas en esta obra.
+            No hay hallazgos vigentes en esta obra.
           </Typography>
         ) : (
           <Box component="ul" aria-label="Hallazgos" sx={{ ...LISTA, mb: 2 }}>
@@ -112,7 +112,7 @@ export function ControlMaterialesPanel({ obraId }: Props) {
         </Typography>
         {datos.sugerencias.length === 0 ? (
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            No hay sugerencias pendientes.
+            No hay sugerencias pendientes en esta obra.
           </Typography>
         ) : (
           <Box component="ul" aria-label="Sugerencias pendientes" sx={LISTA}>
