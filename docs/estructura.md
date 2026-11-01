@@ -29,7 +29,7 @@ src/
     configuracion.ts           # window.plataforma.configuracion.gatewayUrl (en desarrollo, http://localhost:4000/graphql)
     apollo.ts                  # cliente con SetContextLink que usa obtenerToken(); StockMaterial sin normalizar (no tiene id propio)
     errores.ts                 # extensions.codigo → mensaje
-    permisos.ts                # roles efectivos del ERP (solo los internos) y puedeGestionarMateriales (solo admin)
+    permisos.ts                # roles efectivos del ERP (solo los internos), puedeGestionarMateriales (solo admin) y puedeVerAgentes (502: admin, gerente, residente)
     formato.ts
     conexion.ts                # 104: window.plataforma.conexion y almacen del shell, useEnLinea (evento plataforma:conexion)
     consulta-respaldo.ts       # 104: useConsultaConRespaldo (network-only en línea y guarda; lo guardado sin conexión o ante fallo de red)
@@ -37,6 +37,9 @@ src/
     CatalogoPagina.tsx (tabla paginada en el gateway, búsqueda con espera de 300 ms, activar/desactivar con confirmación), MaterialFormulario.tsx (Drawer lateral con TanStack Form), material.esquema.ts (Zod), catalogo.graphql.ts (operaciones, tipos y hooks useMateriales, useGuardarMaterial)
   stock/
     StockPagina.tsx (selector de obra con la obra en ?obra=, tabla con chips de estado), FijarMinimoDialogo.tsx (fijar mínimo de una fila o agregar un material activo del catálogo con Autocomplete), stock.graphql.ts (obras, stockObra, definirStockMinimo), estado-stock.ts
+  agentes/                     # 502: panel «Control de materiales» del stock por obra
+    agentes.graphql.ts         # consulta ControlMateriales (hallazgos y sugerencias PENDIENTE del agente CONTROL_MATERIALES de la obra, en una sola petición), tipos, severidad y tipos de hallazgo
+    ControlMaterialesPanel.tsx # hallazgos vigentes (tipo, severidad, situación, causa, evidencia) y sugerencias pendientes; lo escrito por el agente se muestra como texto
   compartido/
     TablaDatos.tsx             # TanStack Table 9 (rowSortingFeature) dibujada con Table de MUI; meta.numerica alinea a la derecha con cifras tabulares
     EstadoChip.tsx, EstadoVacio.tsx, EstadoError.tsx

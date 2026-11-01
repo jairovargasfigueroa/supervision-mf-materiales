@@ -9,6 +9,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import { getRouteApi } from '@tanstack/react-router';
+import { ControlMaterialesPanel } from '../agentes/ControlMaterialesPanel';
 import { AvisoSinConexion } from '../compartido/AvisoSinConexion';
 import { BotonEscritura } from '../compartido/BotonEscritura';
 import { EstadoChip } from '../compartido/EstadoChip';
@@ -17,7 +18,7 @@ import { EstadoVacio } from '../compartido/EstadoVacio';
 import { ayudanteColumnas, TablaDatos } from '../compartido/TablaDatos';
 import { codigoDeError, mensajeDeError } from '../nucleo/errores';
 import { formatearCantidad } from '../nucleo/formato';
-import { usePuedeGestionarMateriales } from '../nucleo/permisos';
+import { usePuedeGestionarMateriales, usePuedeVerAgentes } from '../nucleo/permisos';
 import { AYUDA_ESTADOS, presentacionEstado, unidadSegunCantidad } from './estado-stock';
 import { FijarMinimoDialogo } from './FijarMinimoDialogo';
 import { useObras, useStockObra, type StockMaterial } from './stock.graphql';
@@ -35,6 +36,7 @@ export function StockPagina() {
   const { obra: obraId } = ruta.useSearch();
   const navegar = ruta.useNavigate();
   const puedeGestionar = usePuedeGestionarMateriales();
+  const puedeVerAgentes = usePuedeVerAgentes();
   const obras = useObras();
   const stock = useStockObra(obraId);
   const [dialogo, setDialogo] = useState<Dialogo>({ abierto: false });
@@ -87,6 +89,11 @@ export function StockPagina() {
 
   // 104: el aviso de datos guardados es el del stock de la obra o, sin obra elegida, el de la lista de obras
   const consultaDelAviso = obraId ? stock : obras;
+
+  // 502: panel del agente de materiales de la obra elegida; no si la obra no existe o el usuario no la ve, ni
+  // cuando la pantalla ya avisa que no tiene datos guardados en el equipo (104)
+  const obraNoEncontrada = !stock.data && codigoDeError(stock.error) === 'OBRA_NO_ENCONTRADA';
+  const verPanelAgente = puedeVerAgentes && !!obraId && !obraNoEncontrada && !stock.sinDatosGuardados;
 
   const contenido = () => {
     if (consultaDelAviso.sinDatosGuardados) return null;
@@ -152,6 +159,8 @@ export function StockPagina() {
       <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
         {AYUDA_ESTADOS}
       </Typography>
+
+      {verPanelAgente && <ControlMaterialesPanel key={obraId} obraId={obraId} />}
 
       {puedeGestionar && obraId && (
         <FijarMinimoDialogo

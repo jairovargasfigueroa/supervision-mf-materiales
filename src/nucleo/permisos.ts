@@ -21,3 +21,15 @@ export function puedeGestionarMateriales(roles: readonly string[]): boolean {
 export function usePuedeGestionarMateriales(): boolean {
   return puedeGestionarMateriales(useSesion()?.usuario.roles ?? []);
 }
+
+/**
+ * Panel «Control de materiales» y «Aprobar» / «Rechazar» sus sugerencias (502, criterios 15 y 18): `admin`,
+ * `gerente` y `residente`. Que el residente vea y decida solo lo de sus obras lo aplica el servicio de IA.
+ */
+export function puedeVerAgentes(roles: readonly string[]): boolean {
+  return rolesEfectivos(roles).some((rol) => rol === 'admin' || rol === 'gerente' || rol === 'residente');
+}
+
+export function usePuedeVerAgentes(): boolean {
+  return puedeVerAgentes(useSesion()?.usuario.roles ?? []);
+}
