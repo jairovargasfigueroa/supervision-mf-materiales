@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CombinedGraphQLErrors, ServerError } from '@apollo/client/errors';
-import { codigoDeError, mensajeDeError } from './errores';
+import { codigoDeError, erroresDeCampo, mensajeDeError } from './errores';
 
 const errorGraphql = (codigo?: string) =>
   new CombinedGraphQLErrors({
@@ -36,5 +36,34 @@ describe('errores', () => {
     expect(mensajeDeError(new TypeError('Failed to fetch'))).toBe(
       'No hay conexión con el servidor. Revisa tu conexión a internet e intenta de nuevo.',
     );
+  });
+
+  it('tiene los textos de decidir una sugerencia (502)', () => {
+    expect(mensajeDeError(errorGraphql('SUGERENCIA_YA_DECIDIDA'))).toBe(
+      'Esta sugerencia ya fue aprobada o rechazada. Recarga la lista.',
+    );
+    expect(mensajeDeError(errorGraphql('SUGERENCIA_NO_ENCONTRADA'))).toBe(
+      'No encontramos esa sugerencia o no tienes acceso a ella.',
+    );
+    expect(mensajeDeError(errorGraphql('COMENTARIO_INVALIDO'))).toBe('Revisa el comentario.');
+    expect(mensajeDeError(errorGraphql('MOTIVO_INVALIDO'))).toBe('El motivo debe tener entre 10 y 500 caracteres.');
+  });
+
+  it('erroresDeCampo lee extensions.errores[] y descarta lo que no tiene campo y mensaje', () => {
+    const error = new CombinedGraphQLErrors({
+      data: null,
+      errors: [
+        {
+          message: 'x',
+          extensions: {
+            codigo: 'COMENTARIO_INVALIDO',
+            errores: [{ campo: 'comentario', mensaje: 'Hasta 300' }, { campo: 'otro' }],
+          },
+        },
+      ],
+    });
+    expect(erroresDeCampo(error)).toEqual([{ campo: 'comentario', mensaje: 'Hasta 300' }]);
+    expect(erroresDeCampo(errorGraphql('SIN_PERMISO'))).toEqual([]);
+    expect(erroresDeCampo(new TypeError('Failed to fetch'))).toEqual([]);
   });
 });
