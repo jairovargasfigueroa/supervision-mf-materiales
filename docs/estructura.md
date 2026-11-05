@@ -26,7 +26,7 @@ src/
   router.tsx                   # árbol de rutas (catalogo, stock, ordenes en capa 2); /materiales lleva a /materiales/catalogo; pestañas del área
   nucleo/
     sesion.ts                  # window.plataforma.sesion (obtenerToken, usuario, roles)
-    configuracion.ts           # window.plataforma.configuracion.gatewayUrl (en desarrollo, http://localhost:4000/graphql)
+    configuracion.ts           # única fuente de la dirección del gateway: window.plataforma.configuracion.gatewayUrl (601; sin el shell, http://localhost:4000/graphql)
     apollo.ts                  # cliente con SetContextLink que usa obtenerToken(); StockMaterial sin normalizar (no tiene id propio)
     errores.ts                 # extensions.codigo → mensaje; erroresDeCampo (extensions.errores[] de un 400 o 422)
     permisos.ts                # roles efectivos del ERP (solo los internos), puedeGestionarMateriales (solo admin) y puedeVerAgentes (502: admin, gerente, residente)
@@ -49,6 +49,7 @@ src/
     AvisoSinConexion.tsx       # 104: «Sin conexión · datos del dd/mm/aaaa hh:mm» o «No hay datos guardados de esta pantalla»
     BotonEscritura.tsx         # 104: botón de una acción que escribe; sin conexión, deshabilitado con «Requiere conexión»
 build.mjs, federation.config.js, vitest.config.ts, vitest.setup.ts (scrollTo de jsdom), public/index.html
+.github/workflows/ci.yml   # 601: tipos, pruebas y compilación; en main, dist/ como artefacto
 ```
 
 ## Reglas
