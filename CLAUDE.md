@@ -4,13 +4,13 @@ Microfrontend del ERP para materiales: catálogo, stock mínimo, stock por obra 
 
 Parte de la «Plataforma de supervisión de obras». Si existe `../../CLAUDE.md` (carpeta que agrupa todos los proyectos), léelo primero: tiene las reglas transversales, el plan y los contratos generales.
 
-**Estado:** Native Federation configurado, tema MUI dentro del Shadow DOM, `formato.ts`, estados vacío y error, y lectura de la sesión del shell (`nucleo/sesion.ts`, `nucleo/configuracion.ts`; sin shell muestra «Abre esta pantalla desde el ERP») (fase 1); sin pantallas del negocio. No implementes una funcionalidad sin su especificación aprobada en `docs/specs/`.
+**Estado:** Native Federation configurado, tema MUI dentro del Shadow DOM, `formato.ts`, estados vacío y error, y lectura de la sesión del shell (`nucleo/sesion.ts`, `nucleo/configuracion.ts`; sin shell muestra «Abre esta pantalla desde el ERP») (fase 1). 003: Apollo Client con el token del shell, rutas `/materiales/catalogo` y `/materiales/stock`, catálogo (tabla con búsqueda, formulario lateral, activar/desactivar) y stock por obra (estados con color, fijar mínimo, agregar material); las acciones de escritura solo para `admin`. 104: catálogo y stock con respaldo en el almacén del shell (`useConsultaConRespaldo`, aviso «Sin conexión · datos del…») y acciones de escritura deshabilitadas sin conexión (`BotonEscritura`). 502: panel «Control de materiales» en el stock por obra (`agentes/`) con los hallazgos vigentes y las sugerencias pendientes del agente de materiales, diálogos de aprobar y rechazar, y «No disponible por el momento» si IA no responde. No implementes una funcionalidad sin su especificación aprobada en `docs/specs/`.
 
 ## Stack
 
 - Node 24 · React 19 · TypeScript 6
 - Native Federation 4 con el **adaptador esbuild** (`@softarc/native-federation` 4.7 + `@softarc/native-federation-esbuild` 4.2) y su preset oficial de React
-- Previsto: Apollo Client 4 (GraphQL hacia el gateway)
+- Apollo Client 4 + `graphql` 16 (GraphQL hacia el gateway; `rxjs` 7 es dependencia obligatoria de Apollo 4), cliente en `src/nucleo/apollo.ts` con el token del shell
 - Puerto: `4202` (`PORT`)
 
 ## Comandos
@@ -31,6 +31,10 @@ npm test             # Vitest
 - `federation.config.js` expone `./Bootstrap`; el shell lo carga y luego usa la etiqueta `<mf-materiales>`.
 - `build.mjs` compila con `runEsBuildBuilder` y, con `--dev`, sirve `dist/` y `public/` con CORS abierto para el shell.
 - Los estilos van dentro del Shadow DOM; no se cargan hojas globales.
+
+## Publicación (601)
+
+- Se compila **una vez** (`npm run build` → `dist/`) y se publica como archivos estáticos (sin imagen Docker ni variables al compilar). La dirección del gateway sale de `window.plataforma.configuracion.gatewayUrl`, que publica el shell; sin el shell, la de desarrollo. CI en `.github/workflows/ci.yml`.
 
 ## Estructura
 
